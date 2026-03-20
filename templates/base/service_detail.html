@@ -39,7 +39,7 @@
                         </div>
                     </div>
                     <div>
-                        <a href="book-appointment.html" class="btn btn-primary me-4">Book Now <i class="fas fa-arrow-right ms-2"></i></a>
+                        <a href="{% url 'base:book_session' service.id coach.id %}" class="btn btn-primary me-4">Book Now <i class="fas fa-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>

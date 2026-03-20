@@ -16,6 +16,7 @@ class Client(models.Model):
     address = models.CharField(max_length=100, null=True, blank=True)
     email = models.CharField(max_length=100, null=True, blank=True)
     gender = models.CharField(max_length=100, null=True, blank=True)
+    dob = models.DateField(default=timezone.now, null=True, blank=True)
 
     def __str__(self):
         return f"{self.full_name}"
