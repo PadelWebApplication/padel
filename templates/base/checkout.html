@@ -74,11 +74,11 @@
     </div>
 </section>
 
-<script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
+<script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=USD"></script>
 <script src="https://js.stripe.com/v3/"></script>
 
 <script>
-    var stripe = Stripe("STRIPE_PUBLIC_KEY_HERE");
+    var stripe = Stripe("{{ stripe_public_key }}");
     var checkoutButton = document.getElementById("stripe-payment");
 
     try {

@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 
 from base import models as base_models
 from coach import models as coach_models
@@ -75,8 +76,11 @@ def book_session(request, service_id, coach_id):
 
 def checkout(request, billing_id):
     billing = base_models.Billing.objects.get(billing_id=billing_id)
+
     context = {
-        "billing": billing
+        "billing": billing,
+        "stripe_public_key": settings.STRIPE_PUBLIC_KEY,
+        "paypal_client_id": settings.PAYPAL_CLIENT_ID
     }
 
     return render(request, "base/checkout.html", context)
