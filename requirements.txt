@@ -21,3 +21,4 @@ channels==4.0.0
 crispy-bootstrap5==0.7
 environs==9.5.0
 marshmallow==3.19.0
+stripe==14.4.1
