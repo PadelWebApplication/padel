@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.http import JsonResponse
 
+import requests
 import stripe
 
 from base import models as base_models
@@ -149,6 +150,58 @@ def stripe_payment_verify(request, billing_id):
     else:
         return redirect(f"/payment_status/{billing.billing_id}/?payment_status=failed")
     
+
+def get_paypal_access_token():
+    token_url = "https://api.sandbox.paypal.com/v1/oauth2/token"
+    data = {"grant_type": "client_credentials"}
+    auth = (settings.PAYPAL_CLIENT_ID, settings.PAYPAL_SECRET_ID)
+    response = requests.post(token_url, data=data, auth=auth)
+
+    if response.status_code == 200:
+        print("Access Token:", response.json()["access_token"])
+        return response.json()["access_token"]
+    else:
+        raise Exception(f"Failed to get access token from Paypal. Status code: {response.status_code}")
+
+
+def paypal_payment_verify(request, billing_id):
+    billing = base_models.Billing.objects.get(billing_id=billing_id)
+
+    transaction_id = request.GET.get("transaction_id")
+    paypal_api_url = f"https://api-m.sandbox.paypal.com/v2/checkout/orders/{transaction_id}"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {get_paypal_access_token()}"
+    }
+
+    response = requests.get(paypal_api_url, headers=headers)
+
+    if response.status_code == 200:
+        paypal_order_data = response.json()
+        paypal_payment_status = paypal_order_data["status"]
+
+        if paypal_payment_status == "COMPLETED":
+            if billing.status == "Unpaid":
+                billing.status = "Paid"
+                billing.save()
+                billing.session.status = "Completed"
+                billing.session.save()
+
+                coach_models.Notification.objects.create(
+                    coach=billing.session.coach,
+                    session=billing.session,
+                    type="New Session"
+                )
+
+                client_models.Notification.objects.create(
+                    client=billing.session.client,
+                    session=billing.session,
+                    type="Session Scheduled"
+                )
+
+                return redirect(f"/payment_status/{billing.billing_id}/?payment_status=paid")        
+    return redirect(f"/payment_status/{billing.billing_id}/?payment_status=failed")
+
 
 @login_required
 def payment_status_page(request, billing_id):
