@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from coach import models as coach_models
 from base import models as base_models
@@ -48,3 +49,37 @@ def session_detail(request, session_id):
 
     return render(request, "coach/session_detail.html", context)
     
+
+@login_required
+def cancel_session(request, session_id):
+    coach = coach_models.Coach.objects.get(user=request.user)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+
+    session.status = "Cancelled"
+    session.save()
+
+    messages.success(request, "Session cancelled successfully")
+    return redirect("coach:session_detail", session.session_id)
+
+
+@login_required
+def activate_session(request, session_id):
+    coach = coach_models.Coach.objects.get(user=request.user)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+
+    session.status = "Scheduled"
+    session.save()
+
+    messages.success(request, "Session Re-Scheduled successfully")
+    return redirect("coach:session_detail", session.session_id)
+
+@login_required
+def complete_session(request, session_id):
+    coach = coach_models.Coach.objects.get(user=request.user)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+
+    session.status = "Completed"
+    session.save()
+
+    messages.success(request, "Session completed successfully")
+    return redirect("coach:session_detail", session.session_id)
