@@ -49,5 +49,8 @@ class BillingAdmin(admin.ModelAdmin):
 
 admin.site.register(models.Service, ServiceAdmin)
 admin.site.register(models.Session, SessionAdmin)
+admin.site.register(models.SessionNote, SessionNoteAdmin)
+admin.site.register(models.ActionItem, ActionItemAdmin)
+admin.site.register(models.Resource, ResourceAdmin)
 admin.site.register(models.Billing, BillingAdmin)
 

@@ -12,4 +12,8 @@ urlpatterns = [
      path("cancel_session/<session_id>/", views.cancel_session, name="cancel_session"),
      path("activate_session/<session_id>/", views.activate_session, name="activate_session"),
      path("complete_session/<session_id>/", views.complete_session, name="complete_session"),
+
+     path("add_session_note/<session_id>/", views.add_session_note, name="add_session_note"),
+     path("edit_session_note/<session_id>/<session_note_id>/", views.edit_session_note, name="edit_session_note"),
+
 ]

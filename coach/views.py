@@ -58,7 +58,7 @@ def cancel_session(request, session_id):
     session.status = "Cancelled"
     session.save()
 
-    messages.success(request, "Session cancelled successfully")
+    messages.success(request, "Session Cancelled Successfully")
     return redirect("coach:session_detail", session.session_id)
 
 
@@ -70,7 +70,7 @@ def activate_session(request, session_id):
     session.status = "Scheduled"
     session.save()
 
-    messages.success(request, "Session Re-Scheduled successfully")
+    messages.success(request, "Session Re-Scheduled Successfully")
     return redirect("coach:session_detail", session.session_id)
 
 @login_required
@@ -81,5 +81,43 @@ def complete_session(request, session_id):
     session.status = "Completed"
     session.save()
 
-    messages.success(request, "Session completed successfully")
+    messages.success(request, "Session Completed Successfully")
     return redirect("coach:session_detail", session.session_id)
+
+
+@login_required
+def add_session_note(request, session_id):
+    coach = coach_models.Coach.objects.get(user=request.user)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+
+    if request.method == "POST":
+        summary = request.POST.get("summary")
+        client_mindset = request.POST.get("client_mindset")
+        coach_observations = request.POST.get("coach_observations")
+        
+        base_models.SessionNote.objects.create(session=session, summary=summary, 
+                                               client_mindset=client_mindset, coach_observations=coach_observations)
+
+        messages.success(request, "Session Note Added Successfully")
+        return redirect("coach:session_detail", session.session_id)
+    
+
+@login_required
+def edit_session_note(request, session_id, session_note_id):
+    coach = coach_models.Coach.objects.get(user=request.user)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session_note = base_models.SessionNote.objects.get(id=session_note_id, session=session)
+
+    if request.method == "POST":
+        summary = request.POST.get("summary")
+        client_mindset = request.POST.get("client_mindset")
+        coach_observations = request.POST.get("coach_observations")
+
+        session_note.summary = summary
+        session_note.client_mindset = client_mindset
+        session_note.coach_observations = coach_observations
+        session_note.save()
+
+        messages.success(request, "Session Note Updated Successfully")
+        return redirect("coach:session_detail", session.session_id)
+
