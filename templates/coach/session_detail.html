@@ -37,9 +37,14 @@
 
                 <div id="medical-report">
                     <div class="d-flex justify-content-between">
-                        <h4 class="mb-0 mb-4 fw-bold">Medical Reports</h4>
-                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMedicalReport" aria-expanded="false" aria-controls="collapseMedicalReport">Add Medical Report <i class="fas fa-plus ms-2"></i></button>
-                    </div>
+                        <h4 class="mb-0 mb-4 fw-bold">Session Note</h4>
+                        {% if not session_note %}
+                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#collapseMedicalReport" aria-expanded="false" aria-controls="collapseMedicalReport">
+                        Add Session Note <i class="fas fa-plus ms-2"></i>
+                    </button>
+                    {% endif %}    
+                </div>
                     <div class="collapse" id="collapseMedicalReport">
                         <div class="border p-3 mb-4 rounded-4">
                             <form action="{% url "coach:add_session_note" session.session_id %}" method="POST">
@@ -53,94 +58,153 @@
                     </div>
                     <div class="card mb-4">
                         <div class="border p-3 mb-4 rounded-4">
-                            {% for note in session_notes %}
+                            {% if session_note %}
                                 <div class="shadow p-3 rounded-4 mb-3">
-                                    <p><span class="fw-semibold text-dark">Summary:</span> {{ note.summary }}</p>
-                                    <p><span class="fw-semibold text-dark">Client Mindset:</span> {{ note.client_mindset }}</p>
-                                    <p><span class="fw-semibold text-dark">Coach Observations:</span> {{ note.coach_observations }}</p>
-                                    <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMedicalRecord{{ note.id }}" aria-expanded="false" aria-controls="collapseMedicalRecord{{ note.id }}">Edit <i class="fas fa-edit ms-2"></i></button>
-                                    <div class="collapse mt-3" id="collapseMedicalRecord1">
+                                    <p><span class="fw-semibold text-dark">Summary:</span> {{ session_note.summary }}</p>
+                                    <p><span class="fw-semibold text-dark">Client Mindset:</span> {{ session_note.client_mindset }}</p>
+                                    <p><span class="fw-semibold text-dark">Coach Observations:</span> {{ session_note.coach_observations }}</p>
+
+                                    <button class="btn btn-dark btn-sm" type="button" 
+                                            data-bs-toggle="collapse" 
+                                            data-bs-target="#collapseNote{{ session_note.id }}">
+                                        Edit <i class="fas fa-edit ms-2"></i>
+                                    </button>
+                                    
+                                    <div class="collapse mt-3" id="collapseNote{{ session_note.id }}">
                                         <div class="border p-3 rounded-4">
-                                            <form action="{% url "coach:edit_session_note" session.session_id note.id %}" method="POST">
+                                            <form action="{% url 'coach:edit_session_note' session.session_id session_note.id %}" method="POST">
                                                 {% csrf_token %}
-                                                <input type="text" class="form-control mb-3" name="summary" placeholder="Summary" />
-                                                <input type="text" class="form-control mb-3" name="client_mindset" placeholder="Client Mindset" />
-                                                <input type="text" class="form-control mb-3" name="coach_observations" placeholder="Coach Observations" />
-                                                <button type="submit" class="btn btn-secondary btn-sm">Save Changes <i class="fas fa-save ms-2"></i></button>
+                                                <input type="text" class="form-control mb-3" name="summary" value="{{ session_note.summary }}" placeholder="Summary" />
+                                                <input type="text" class="form-control mb-3" name="client_mindset" value="{{ session_note.client_mindset }}" placeholder="Client Mindset" />
+                                                <input type="text" class="form-control mb-3" name="coach_observations" value="{{ session_note.coach_observations }}" placeholder="Coach Observations" />
+                                                
+                                                <button type="submit" class="btn btn-secondary btn-sm">
+                                                    Save Changes <i class="fas fa-save ms-2"></i>
+                                                </button>
                                             </form>
                                         </div>
                                     </div>
                                 </div>
-                                {% empty %}
-                                    <p>No medical records</p>
-                            {% endfor %}
+                            {% else %}
+                                <p class="text-center text-muted">No Session Note Found.</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
 
                 <div id="lab-test">
                     <div class="d-flex justify-content-between">
-                        <h4 class="mb-0 mb-4 fw-bold">Labs Tests Reports</h4>
-                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLabTest" aria-expanded="false" aria-controls="collapseLabTest">Add Lab Test <i class="fas fa-plus ms-2"></i></button>
+                        <h4 class="mb-0 mb-4 fw-bold">Action Items</h4>
+                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#collapseLabTest" aria-expanded="false" aria-controls="collapseLabTest">
+                                Add Action Item <i class="fas fa-plus ms-2"></i></button>
                     </div>
                     <div class="collapse" id="collapseLabTest">
                         <div class="border p-3 mb-4 rounded-4">
-                            <form action="#" method="POST">
-                                <input type="text" class="form-control mb-3" name="test_name" placeholder="Test name" />
-                                <input type="text" class="form-control mb-3" name="description" placeholder="Description" />
-                                <button class="btn btn-secondary btn-sm">Save <i class="fas fa-save ms-2"></i></button>
+                            <form action="{% url 'coach:add_action_item' session.session_id %}" method="POST">
+                                {% csrf_token %}
+                                <input type="text" class="form-control mb-3" name="task" placeholder="Task Name" required />
+                                <textarea class="form-control mb-3" name="description" placeholder="Description"></textarea>
+                                
+                                <label class="form-label text-muted small">Due Date</label>
+                                <input type="date" class="form-control mb-3" name="due_date" />
+
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" name="is_completed" id="is_completed">
+                                    <label class="form-check-label" for="is_completed">Mark as Completed</label>
+                                </div>
+
+                                <button type="submit" class="btn btn-secondary btn-sm">Save Action <i class="fas fa-save ms-2"></i></button>
                             </form>
                         </div>
                     </div>
                     <div class="card mb-4">
                         <div class="border p-3 mb-4 rounded-4">
+                            {% for item in action_items %}
                             <div class="shadow p-3 rounded-4 mb-3">
-                                <p><span class="fw-semibold text-dark">Test Name:</span> Blood Test</p>
-                                <p><span class="fw-semibold text-dark">Description:</span> Complete Blood Count</p>
-                                <p><span class="fw-semibold text-dark">Result:</span> Not added yet</p>
+                                <p><span class="fw-semibold text-dark">Task:</span> {{ item.task }}</p>
+                                <p><span class="fw-semibold text-dark">Description:</span> {{ item.description }}</p>
+                                <p><span class="fw-semibold text-dark">Due Date:</span> {{ item.due_date }}</p>
+                                <p><span class="fw-semibold text-dark">Is Completed:</span> {{ item.is_completed }}</p>
                                 <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLabTest1" aria-expanded="false" aria-controls="collapseLabTest1">Edit <i class="fas fa-edit ms-2"></i></button>
                                 <div class="collapse mt-3" id="collapseLabTest1">
                                     <div class="border p-3 rounded-4">
-                                        <form action="#" method="POST">
-                                            <input type="text" class="form-control mb-3" value="Blood Test" name="test_name" placeholder="Test name" />
-                                            <input type="text" class="form-control mb-3" value="Complete Blood Count" name="description" placeholder="Description" />
+                                        <form action="{% url 'coach:edit_action_item' session.session_id item.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="text" class="form-control mb-3" value="{{ item.task }}" name="task" placeholder="Task" />
+                                            <input type="text" class="form-control mb-3" value="{{ item.description }}" name="description" placeholder="Description" />
+                                            <input type="date" class="form-control mb-3" value="{{ item.due_date|date:'Y-m-d' }}" name="due_date" placeholder="Due Date" />
+                                            <div class="form-check mb-3">
+                                                <input type="checkbox" class="form-check-input" name="is_completed" id="is_completed{{ item.id }} {% if item.is_completed %}checked{% endif %}">
+                                                <label class="form-check-label" for="is_completed{{ item.id }}">Mark as Completed</label>
+                                            </div>
                                             <button class="btn btn-secondary btn-sm">Save Changes <i class="fas fa-save ms-2"></i></button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
-                            <p>No lab tests</p>
+                            {% empty %}
+                            <p>No Action Items</p>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <h4 class="mb-0 mb-4 fw-bold">Prescription</h4>
-                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrescription" aria-expanded="false" aria-controls="collapsePrescription">Add Prescription <i class="fas fa-plus ms-2"></i></button>
+                    <h4 class="mb-0 mb-4 fw-bold">Resources</h4>
+                    <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapseAddResource" aria-expanded="false" 
+                                    aria-controls="collapseAddResource">
+                                    Add Resource <i class="fas fa-plus ms-2"></i>
+                                </button>
                 </div>
-                <div class="collapse" id="collapsePrescription">
+                <div class="collapse mt-3" id="collapseAddResource">
                     <div class="border p-3 mb-4 rounded-4">
-                        <form action="#" method="POST">
-                            <textarea class="form-control mb-3" name="medications" placeholder="Medications"></textarea>
-                            <button class="btn btn-secondary btn-sm">Save <i class="fas fa-save ms-2"></i></button>
+                        <form action="{% url "coach:add_resource" session.session_id %}" method="POST" enctype="multipart/form-data">
+                           {% csrf_token %}
+                                <input type="text" class="form-control mb-3" name="title" placeholder="Title" required />
+                                <input type="url" class="form-control mb-3" name="link" placeholder="Link"/>
+                                <input type="file" class="form-control mb-3" name="file" />
+                                <button class="btn btn-secondary btn-sm">Save <i class="fas fa-save ms-2"></i></button>
                         </form>
                     </div>
                 </div>
                 <div class="card mb-4">
                     <div class="border p-3 mb-4 rounded-4">
+                        {% for resource in resources %}
                         <div class="shadow p-3 rounded-4 mb-3">
-                            <p><span class="fw-semibold text-dark">Medications:</span> Paracetamol, Ibuprofen</p>
-                            <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrescription1" aria-expanded="false" aria-controls="collapsePrescription1">Edit <i class="fas fa-edit ms-2"></i></button>
-                            <div class="collapse mt-3" id="collapsePrescription1">
+                            <p><span class="fw-semibold text-dark">Title:</span> {{ resource.title }}</p>
+                            {% if resource.link %}
+                                <p><span class="fw-semibold text-dark">Link:</span> <a href="{{ resource.link }}" target="_blank">{{ resource.link }}</a></p>
+                            {% endif %}
+                            {% if resource.file %}
+                                <p><span class="fw-semibold text-dark">File:</span> 
+                                    <a href="{{ resource.file.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                        Download/View File <i class="fas fa-download ms-1"></i>
+                                    </a>
+                                </p>
+                            {% endif %}
+                            <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapseRes{{ resource.id }}" aria-expanded="false" 
+                                            aria-controls="collapseRes{{ resource.id }}">
+                                            Edit <i class="fas fa-edit ms-2"></i>
+                                        </button>
+                            <div class="collapse mt-3" id="collapseRes{{ resource.id }}">
                                 <div class="border p-3 rounded-4">
-                                    <form action="#" method="POST">
-                                        <input type="text" class="form-control mb-3" name="medications" value="Paracetamol, Ibuprofen" placeholder="Medications" />
+                                    <form action="{% url "coach:edit_resource" session.session_id resource.id %}" method="POST" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <input type="text" class="form-control mb-3" value="{{ resource.title }}" name="title" placeholder="Title" required />
+                                        <input type="url" class="form-control mb-3" value="{{ resource.link }}" name="link" placeholder="Link"/>
+                                        <p class="small text-muted">Current File: {{ resource.file.name|default:"None" }}</p>
+                                        <input type="file" class="form-control mb-3" name="file" />
                                         <button class="btn btn-secondary btn-sm">Save Changes <i class="fas fa-save ms-2"></i></button>
                                     </form>
                                 </div>
                             </div>
                         </div>
-                        <p>No prescriptions</p>
+                        {% empty %}
+                        <p>No Resources</p>
+                        {% endfor %} 
                     </div>
                 </div>
             </div>
