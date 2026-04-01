@@ -23,6 +23,8 @@ urlpatterns = [
      path("edit_resource/<session_id>/<resource_id>/", views.edit_resource, name="edit_resource"),
 
      path("payments/", views.payments, name="payments"),
+     path("notifications/", views.notifications, name="notifications"),
+     path("mark_notifications_seen/<notification_id>/", views.mark_notifications_seen, name="mark_notifications_seen"),
      
 
 ]

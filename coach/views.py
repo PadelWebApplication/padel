@@ -219,3 +219,24 @@ def payments(request):
 
     return render(request, "coach/payments.html", context)
 
+@login_required
+def notifications(request):
+    coach = coach_models.Coach.objects.get(user=request.user)
+    notifications = coach_models.Notification.objects.filter(coach=coach, seen=False)
+
+    context = {
+        "notifications": notifications,
+    }
+
+    return render(request, "coach/notifications.html", context)
+
+
+@login_required
+def mark_notifications_seen(request, notification_id):
+    coach = coach_models.Coach.objects.get(user=request.user)
+    notifications = coach_models.Notification.objects.get(coach=coach, id=notification_id)
+    notifications.seen = True
+    notifications.save()
+
+    messages.success(request, "Notification marked as seen")
+    return redirect("coach:notifications")

@@ -5,7 +5,6 @@
         <div class="row mt-0 mt-md-4">
             {% include "coach/sidebar.html" %}
 
-
             <div class="col-lg-9 col-md-8 col-12">
                 <h4 class="mb-0 mb-4 fw-bold">Session Detail {{ session.session_id }}</h4>
                 <div class="card mb-4">
@@ -19,6 +18,7 @@
                                 <p><span class="fw-semibold text-dark">Date:</span> {{ session.session_date }}</p>
                                 <p>
                                     <span class="fw-semibold text-dark">Action:</span>
+
                                     {% if session.status == "Scheduled" %}
                                     <a href="{% url "coach:cancel_session" session.session_id %}" class="btn btn-outline-danger btn-sm">Cancel Session <i class="fas fa-trash ms-2"></i></a>
                                     <a href="{% url "coach:complete_session" session.session_id %}" class="btn btn-outline-success btn-sm">Complete Session <i class="fas fa-check-circle ms-2"></i></a>
@@ -27,7 +27,7 @@
                                     {% if session.status == "Cancelled" %}
                                     <a href="{% url "coach:activate_session" session.session_id %}" class="btn btn-success btn-sm">Activate Session <i class="fas fa-check-circle ms-2"></i></a>
                                     {% endif %}
-                                    
+
                                     {% if session.status == "Completed" %}
                                     <a href="#" class="btn btn-success btn-sm">Completed<i class="fas fa-check-circle ms-2"></i></a>
                                     {% endif %}
@@ -41,15 +41,14 @@
                 <div id="session-note">
                     <div class="d-flex justify-content-between">
                         <h4 class="mb-0 mb-4 fw-bold">Session Note</h4>
-
                         {% if not session_note %}
                         <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" 
                         data-bs-target="#collapseMedicalReport" aria-expanded="false" aria-controls="collapseMedicalReport">
                         Add Session Note <i class="fas fa-plus ms-2"></i>
-                    </button>
-                    {% endif %}    
+                        </button>
+                        {% endif %}    
+                    </div>
 
-                </div>
                     <div class="collapse" id="collapseMedicalReport">
                         <div class="border p-3 mb-4 rounded-4">
                             <form action="{% url "coach:add_session_note" session.session_id %}" method="POST">
@@ -69,13 +68,12 @@
                                     <p><span class="fw-semibold text-dark">Summary:</span> {{ session_note.summary }}</p>
                                     <p><span class="fw-semibold text-dark">Client Mindset:</span> {{ session_note.client_mindset }}</p>
                                     <p><span class="fw-semibold text-dark">Coach Observations:</span> {{ session_note.coach_observations }}</p>
-
                                     <button class="btn btn-dark btn-sm" type="button" 
                                             data-bs-toggle="collapse" 
                                             data-bs-target="#collapseNote{{ session_note.id }}">
                                         Edit <i class="fas fa-edit ms-2"></i>
                                     </button>
-                                    
+                            
                                     <div class="collapse mt-3" id="collapseNote{{ session_note.id }}">
                                         <div class="border p-3 rounded-4">
                                             <form action="{% url 'coach:edit_session_note' session.session_id session_note.id %}" method="POST">
@@ -103,7 +101,8 @@
                         <h4 class="mb-0 mb-4 fw-bold">Action Items</h4>
                         <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" 
                                 data-bs-target="#collapseLabTest" aria-expanded="false" aria-controls="collapseLabTest">
-                                Add Action Item <i class="fas fa-plus ms-2"></i></button>
+                                Add Action Item <i class="fas fa-plus ms-2"></i>
+                        </button>
                     </div>
 
                     <div class="collapse" id="collapseLabTest">
@@ -134,7 +133,12 @@
                                 <p><span class="fw-semibold text-dark">Description:</span> {{ item.description }}</p>
                                 <p><span class="fw-semibold text-dark">Due Date:</span> {{ item.due_date }}</p>
                                 <p><span class="fw-semibold text-dark">Is Completed:</span> {{ item.is_completed }}</p>
-                                <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLabTest1" aria-expanded="false" aria-controls="collapseLabTest1">Edit <i class="fas fa-edit ms-2"></i></button>
+                                <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapseLabTest1" aria-expanded="false" 
+                                        aria-controls="collapseLabTest1">
+                                        Edit <i class="fas fa-edit ms-2"></i>
+                                </button>
+                                
                                 <div class="collapse mt-3" id="collapseLabTest1">
                                     <div class="border p-3 rounded-4">
                                         <form action="{% url 'coach:edit_action_item' session.session_id item.id %}" method="POST">
@@ -162,10 +166,10 @@
                 <div class="d-flex justify-content-between">
                     <h4 class="mb-0 mb-4 fw-bold">Resources</h4>
                     <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse" 
-                                    data-bs-target="#collapseAddResource" aria-expanded="false" 
-                                    aria-controls="collapseAddResource">
-                                    Add Resource <i class="fas fa-plus ms-2"></i>
-                                </button>
+                            data-bs-target="#collapseAddResource" aria-expanded="false" 
+                            aria-controls="collapseAddResource">
+                            Add Resource <i class="fas fa-plus ms-2"></i>
+                    </button>
                 </div>
 
                 <div class="collapse mt-3" id="collapseAddResource">
@@ -188,6 +192,7 @@
                             {% if resource.link %}
                                 <p><span class="fw-semibold text-dark">Link:</span> <a href="{{ resource.link }}" target="_blank">{{ resource.link }}</a></p>
                             {% endif %}
+                            
                             {% if resource.file %}
                                 <p><span class="fw-semibold text-dark">File:</span> 
                                     <a href="{{ resource.file.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
@@ -196,10 +201,10 @@
                                 </p>
                             {% endif %}
                             <button class="btn btn-dark btn-sm" type="button" data-bs-toggle="collapse" 
-                                            data-bs-target="#collapseRes{{ resource.id }}" aria-expanded="false" 
-                                            aria-controls="collapseRes{{ resource.id }}">
-                                            Edit <i class="fas fa-edit ms-2"></i>
-                                        </button>
+                                    data-bs-target="#collapseRes{{ resource.id }}" aria-expanded="false" 
+                                    aria-controls="collapseRes{{ resource.id }}">
+                                    Edit <i class="fas fa-edit ms-2"></i>
+                            </button>
                             
                             <div class="collapse mt-3" id="collapseRes{{ resource.id }}">
                                 <div class="border p-3 rounded-4">
