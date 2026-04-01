@@ -145,7 +145,7 @@
                                             {% csrf_token %}
                                             <input type="text" class="form-control mb-3" value="{{ item.task }}" name="task" placeholder="Task" />
                                             <input type="text" class="form-control mb-3" value="{{ item.description }}" name="description" placeholder="Description" />
-                                            <input type="date" class="form-control mb-3" value="{{ item.due_date|date:'Y-m-d' }}" name="due_date" placeholder="Due Date" />
+                                            <input type="date" class="form-control mb-3" value="{{ item.due_date|date:"Y-m-d" }}" name="due_date" placeholder="Due Date" />
                                             <div class="form-check mb-3">
                                                 <input type="checkbox" class="form-check-input" name="is_completed" id="is_completed{{ item.id }} {% if item.is_completed %}checked{% endif %}">
                                                 <label class="form-check-label" for="is_completed{{ item.id }}">Mark as Completed</label>

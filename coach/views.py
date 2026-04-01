@@ -240,3 +240,46 @@ def mark_notifications_seen(request, notification_id):
 
     messages.success(request, "Notification marked as seen")
     return redirect("coach:notifications")
+
+
+@login_required
+def profile(request):
+    coach = coach_models.Coach.objects.get(user=request.user)
+    formatted_next_available_session_date = ""
+    if coach.next_available_session_date:
+        formatted_next_available_session_date = coach.next_available_session_date.strftime("%Y-%m-%d")
+    
+    if request.method == "POST":
+        full_name = request.POST.get("full_name")
+        image = request.FILES.get("image")
+        mobile = request.POST.get("mobile")
+        country = request.POST.get("country")
+        bio = request.POST.get("bio")
+        specialization = request.POST.get("specialization")
+        qualification = request.POST.get("qualification")
+        years_of_experience = request.POST.get("years_of_experience")
+        next_available_session_date = request.POST.get("next_available_session_date")
+
+        coach.full_name = full_name
+        coach.image = image
+        coach.mobile = mobile
+        coach.country = country
+        coach.bio = bio
+        coach.specialization = specialization
+        coach.qualification = qualification
+        coach.years_of_experience = years_of_experience
+        coach.next_available_session_date = next_available_session_date
+
+        if image != None:
+            coach.image = image
+
+        coach.save()
+        messages.success(request, "Profile Updated Successfully")
+        return redirect("coach:profile")
+
+    context = {
+        "coach": coach,
+        "formatted_next_available_session_date": formatted_next_available_session_date,
+    }
+
+    return render(request, "coach/profile.html", context)
