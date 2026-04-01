@@ -22,4 +22,7 @@ urlpatterns = [
      path("add_resource/<session_id>/", views.add_resource, name="add_resource"),
      path("edit_resource/<session_id>/<resource_id>/", views.edit_resource, name="edit_resource"),
 
+     path("payments/", views.payments, name="payments"),
+     
+
 ]

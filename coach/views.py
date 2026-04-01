@@ -207,3 +207,15 @@ def edit_resource(request, session_id, resource_id):
 
         messages.success(request, "Resource Updated Successfully")
         return redirect("coach:session_detail", session.session_id)
+
+@login_required
+def payments(request):
+    coach = coach_models.Coach.objects.get(user=request.user)
+    payments = base_models.Billing.objects.filter(session__coach=coach, status="Paid")
+
+    context = {
+        "payments": payments,
+    }
+
+    return render(request, "coach/payments.html", context)
+
