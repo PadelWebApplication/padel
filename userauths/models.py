@@ -12,7 +12,7 @@ class User(AbstractUser):
     user_type = models.CharField(max_length=50, choices=USER_TYPE, null=True, blank=True, default=None)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
         return self.username

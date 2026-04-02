@@ -29,7 +29,7 @@
                                     {% endif %}
 
                                     {% if session.status == "Completed" %}
-                                    <a href="#" class="btn btn-success btn-sm">Completed<i class="fas fa-check-circle ms-2"></i></a>
+                                    <a href="{% url "coach:activate_session" session.session_id %}" class="btn btn-success btn-sm">Completed<i class="fas fa-check-circle ms-2"></i></a>
                                     {% endif %}
                                 </p>
                             </a>
@@ -156,7 +156,7 @@
                                 </div>
                             </div>
                             {% empty %}
-                            <p>No Action Items</p>
+                            <p class="text-center text-muted">No Action Items.</p>
                             {% endfor %}
                         </div>
                     </div>
@@ -220,7 +220,7 @@
                             </div>
                         </div>
                         {% empty %}
-                        <p>No Resources</p>
+                        <p class="text-center text-muted">No Resources.</p>
                         {% endfor %}
                     </div>
                 </div>

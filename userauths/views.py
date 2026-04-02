@@ -52,6 +52,8 @@ def login_view(request):
         messages.success(request, "You are already logged in.")
         return redirect("/")
     
+    form = userauths_forms.LoginForm()
+    
     if request.method == "POST":
         form = userauths_forms.LoginForm(request.POST or None)
         
@@ -59,23 +61,22 @@ def login_view(request):
             email = form.cleaned_data.get("email") 
             password = form.cleaned_data.get("password") 
 
-            try:
-                user_instance = userauths_models.User.objects.get(email=email, is_active=True)
-                user_authenticate = authenticate(request, email=email, password=password)
+            user = authenticate(request, email=email, password=password)
 
-                if user_instance is not None:
-                    login(request, user_authenticate)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
                     
-                    messages.success(request, "Account created successfully.")
+                    messages.success(request, "Logged in successfully.")
                     
                     next_url = request.GET.get("next", "/")
                     return redirect(next_url)
                 else:
                     messages.error(request, "Username or password does not exist.")
-            except:
-                messages.error(request, "User does not exist.")
-    else:
-        form = userauths_forms.LoginForm()
+            else:
+                messages.error(request, "Invalid email or password.")
+        else:
+            messages.error(request, "Please correct the errors below.")
 
     context = {
         "form": form

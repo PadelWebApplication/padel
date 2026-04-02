@@ -13,12 +13,12 @@
                             <a href="register.html" class="ms-1"> Sign up </a>
                         </span>
                     </div>
-                    <form class="needs-validation" mathod="POST">
+                    <form class="needs-validation" method="POST">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="email" class="form-label"> Email Address </label>
                             {{ form.email }}
-                            <div class="invalid-feedback">Please enter valid username.</div>
+                            <div class="invalid-feedback">Please enter valid email.</div>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label"> Password </label>
