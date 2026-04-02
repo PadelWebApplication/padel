@@ -4,6 +4,8 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.http import JsonResponse
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 import requests
 import stripe
@@ -146,6 +148,41 @@ def stripe_payment_verify(request, billing_id):
                 type="Session Scheduled"
             )
 
+            try:
+                merge_data = {
+                    "billing": billing,
+                }
+
+                # Send session to coach 
+                subject = "New Session"
+                text_body = render_to_string("email/new_session.txt", merge_data)
+                html_body = render_to_string("email/new_session.html", merge_data)
+
+                msg = EmailMultiAlternatives(
+                    subject=subject,
+                    from_email=settings.FROM_EMAIL,
+                    to=[billing.session.coach.user.email],
+                    body=text_body
+                )
+                msg.attach_alternative(html_body, "text/html")
+                msg.send()
+
+                # Send session booked to client 
+                subject = "Session Booked Successfully"
+                text_body = render_to_string("email/session_booked.txt", merge_data)
+                html_body = render_to_string("email/session_booked.html", merge_data)
+
+                msg = EmailMultiAlternatives(
+                    subject=subject,
+                    from_email=settings.FROM_EMAIL,
+                    to=[billing.session.client.email],
+                    body=text_body
+                )
+                msg.attach_alternative(html_body, "text/html")
+                msg.send()
+            except Exception as e:
+                print(f"Email failed to send: {e}")
+
             return redirect(f"/payment_status/{billing.billing_id}/?payment_status=paid")
     else:
         return redirect(f"/payment_status/{billing.billing_id}/?payment_status=failed")
@@ -198,6 +235,41 @@ def paypal_payment_verify(request, billing_id):
                     session=billing.session,
                     type="Session Scheduled"
                 )
+
+                try:
+                    merge_data = {
+                        "billing": billing,
+                    }
+
+                    # Send session to coach 
+                    subject = "New Session"
+                    text_body = render_to_string("email/new_session.txt", merge_data)
+                    html_body = render_to_string("email/new_session.html", merge_data)
+
+                    msg = EmailMultiAlternatives(
+                        subject=subject,
+                        from_email=settings.FROM_EMAIL,
+                        to=[billing.session.coach.user.email],
+                        body=text_body
+                    )
+                    msg.attach_alternative(html_body, "text/html")
+                    msg.send()
+
+                    # Send session booked to client 
+                    subject = "Session Booked Successfully"
+                    text_body = render_to_string("email/session_booked.txt", merge_data)
+                    html_body = render_to_string("email/session_booked.html", merge_data)
+
+                    msg = EmailMultiAlternatives(
+                        subject=subject,
+                        from_email=settings.FROM_EMAIL,
+                        to=[billing.session.client.email],
+                        body=text_body
+                    )
+                    msg.attach_alternative(html_body, "text/html")
+                    msg.send()
+                except Exception as e:
+                    print(f"Email failed to send: {e}")
 
                 return redirect(f"/payment_status/{billing.billing_id}/?payment_status=paid")        
     return redirect(f"/payment_status/{billing.billing_id}/?payment_status=failed")
