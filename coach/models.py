@@ -6,9 +6,10 @@ from django_enum.fields import EnumCharField
 
 from userauths import models as userauth_model
 from services.coach.enum import NotificationTypeChoices
+from core.db import AbstractCreatedByUpdatedByModel
 
 
-class Coach(models.Model):
+class Coach(AbstractCreatedByUpdatedByModel):
     user = models.OneToOneField(userauth_model.User, on_delete=models.CASCADE)
     image = models.FileField(upload_to='images', null=True, blank=True)
     full_name = models.CharField(max_length=100, null=True, blank=True)
@@ -26,7 +27,7 @@ class Coach(models.Model):
         return f'Coach {self.full_name}'
 
 
-class Notification(models.Model):
+class Notification(AbstractCreatedByUpdatedByModel):
     coach = models.ForeignKey(Coach, on_delete=models.SET_NULL, null=True, blank=True)
     session = models.ForeignKey(
         'base.Session',

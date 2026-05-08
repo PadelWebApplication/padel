@@ -7,9 +7,10 @@ from django_enum.fields import EnumCharField
 from coach import models as coach_models
 from client import models as client_models
 from services.base.enum import SessionStatusChoices
+from core.db import AbstractCreatedByUpdatedByModel
 
 
-class Service(models.Model):
+class Service(AbstractCreatedByUpdatedByModel):
     image = models.FileField(upload_to='images', null=True, blank=True)
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
@@ -20,7 +21,7 @@ class Service(models.Model):
         return f'{self.name} - {self.cost}'
 
 
-class Session(models.Model):
+class Session(AbstractCreatedByUpdatedByModel):
     service = models.ForeignKey(
         Service,
         on_delete=models.SET_NULL,
@@ -57,7 +58,7 @@ class Session(models.Model):
         return f'{self.client.full_name} with {self.coach.full_name}'
 
 
-class Billing(models.Model):
+class Billing(AbstractCreatedByUpdatedByModel):
     client = models.ForeignKey(
         client_models.Client,
         on_delete=models.SET_NULL,
