@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.managers import BaseManager
 from core.exceptions import MaxLengthValidationError
+from core.middleware import AccessLogMiddleware
 
 
 class AbstractValidatableModel(models.Model):
@@ -109,3 +110,6 @@ class AbstractCreatedByUpdatedByModel(AbstractCreatedUpdatedModel):
             kwargs['update_fields'] = list(update_fields)
 
         super().save(*args, **kwargs)
+
+    def _get_user_id(self):
+        return AccessLogMiddleware.get_current_user_id()
