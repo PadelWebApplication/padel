@@ -6,7 +6,7 @@ from django_enum.fields import EnumCharField
 
 from coach import models as coach_models
 from client import models as client_models
-from services.base.enum import SessionStatusChoices
+from services.base.enum import SessionStatusChoices, BillingStatusChoices
 from core.db import AbstractCreatedByUpdatedByModel
 
 
@@ -72,8 +72,13 @@ class Billing(AbstractCreatedByUpdatedByModel):
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2)
     total = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(
-        max_length=120, choices=[('Paid', 'Paid'), ('Unpaid', 'Unpaid')]
+    status = EnumCharField(
+        enum=BillingStatusChoices,
+        default=BillingStatusChoices.unpaid,    
+        verbose_name=_('Status'),
+        max_length=16,
+        blank=True,
+        null=True,
     )
     billing_id = ShortUUIDField(length=6, max_length=10, alphabet='1234567890')
 

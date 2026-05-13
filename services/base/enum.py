@@ -7,3 +7,8 @@ class SessionStatusChoices(ChoiceEnum):
     completed = ('completed', _('Completed'))
     cancelled = ('cancelled', _('Cancelled'))
     pending = ('pending', _('Pending'))
+
+
+class BillingStatusChoices(ChoiceEnum):
+    paid = ('paid', _('Paid'))
+    unpaid = ('unpaid', _('Unpaid'))
