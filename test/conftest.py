@@ -6,11 +6,11 @@ from client.models import Client
 from coach.models import Coach
 from userauths.models import User
 
+
 @pytest.fixture
 def user(db):
     return User.objects.create_user(
-        email='user@mail.com',
-        password='Test@pass183810jdf_'
+        email='user@mail.com', password='Test@pass183810jdf_'
     )
 
 
@@ -40,11 +40,7 @@ def coach_user(db):
 
 @pytest.fixture
 def session(db, service, client, coach):
-    return Session.objects.create(
-        service=service,
-        coach=coach,
-        client=client
-    )
+    return Session.objects.create(service=service, coach=coach, client=client)
 
 
 @pytest.fixture
@@ -57,6 +53,7 @@ def mock_user_id():
     def _mock(user_id):
         return patch(
             'core.middleware.AccessLogMiddleware.get_current_user_id',
-            return_value=user_id
+            return_value=user_id,
         )
+
     return _mock

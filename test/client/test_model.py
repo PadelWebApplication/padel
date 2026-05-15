@@ -128,4 +128,3 @@ def test_notification_updated_by(user, notification, mock_user_id):
 def test_notification_deleted_when_session_deleted(notification, session):
     session.delete()
     assert not Notification.objects.filter(id=notification.id).exists()
-

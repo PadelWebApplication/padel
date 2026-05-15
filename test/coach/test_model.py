@@ -5,12 +5,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from coach.models import Coach, Notification
 from services.coach.enum import NotificationTypeChoices
 
+
 @pytest.fixture
 def coach_with_image(coach):
     image = SimpleUploadedFile(
-        name='test_image.jpg',
-        content=b'some image content',
-        content_type='image/jpeg'
+        name='test_image.jpg', content=b'some image content', content_type='image/jpeg'
     )
     coach.image = image
     coach.save()
@@ -123,7 +122,6 @@ def test_notification_updated_by(user, notification, mock_user_id):
 
     notification.refresh_from_db()
     assert notification.updated_by == user
-
 
 
 @pytest.mark.django_db
