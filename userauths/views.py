@@ -2,14 +2,19 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render
 
 from userauths.serializers import RegisterSerializer, LoginSerializer
+from services.userauths.enum import UserTypeChoices
 from coach import models as coach_models
 from client import models as client_models
 from userauths.models import User
 
 
 class RegisterView(APIView):
+    def get(self, request):
+        return render(request, 'userauths/register.html')
+
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
 
@@ -24,7 +29,7 @@ class RegisterView(APIView):
             user_authenticate = authenticate(request, email=email, password=password)
             login(request, user_authenticate)
 
-            if user_type == 'Coach':
+            if user_type == UserTypeChoices.coach:
                 coach_models.Coach.objects.create(user=user, full_name=full_name)
             else:
                 client_models.Client.objects.create(
@@ -40,6 +45,9 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    def get(self, request):
+        return render(request, 'userauths/login .html')
+
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
 
