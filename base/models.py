@@ -74,7 +74,7 @@ class Billing(AbstractCreatedByUpdatedByModel):
     total = models.DecimalField(max_digits=10, decimal_places=2)
     status = EnumCharField(
         enum=BillingStatusChoices,
-        default=BillingStatusChoices.unpaid,    
+        default=BillingStatusChoices.unpaid,
         verbose_name=_('Status'),
         max_length=16,
         blank=True,
