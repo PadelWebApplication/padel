@@ -46,7 +46,7 @@ class RegisterView(APIView):
 
 class LoginView(APIView):
     def get(self, request):
-        return render(request, 'userauths/login .html')
+        return render(request, 'userauths/login.html')
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
