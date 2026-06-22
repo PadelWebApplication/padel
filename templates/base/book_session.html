@@ -3,9 +3,11 @@
 {% block content %}
 <section class="container">
     <div class="row d-flex justify-content-center align-items-center">
-        <div class="col-12 col-lg-5">
+        {% if coach.image %}
+            <div class="col-12 col-lg-5">
             <img class="img-fluid mt-4" style="width: 100%; height: 550px; object-fit: cover; border-radius: 10px" src"{{ coach.image.url }}" alt="" />
         </div>
+        {% endif %}
 
         <div class="col-12 col-lg-7 p-4 rounded-3 bg-white">
             <h1 class="display-4 fw-bold mt-5">

@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     'userauths',
     'coach',
     'client',
+
+    'import_export',
+    'anymail',
     'rest_framework'
 ]
 
@@ -151,8 +154,18 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
-CRISPY_TEMPLATE_PACK = 'bootstrap5'
+ANYMAIL = {
+    "MAILGUN_API_KEY": env("MAILGUN_API_KEY"),
+    "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN"),
+}
+
+FROM_EMAIL = env("MAILGUN_FROM_EMAIL")
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+DEFAULT_FROM_EMAIL = env("MAILGUN_DEFAULT_FROM_EMAIL")
+SERVER_EMAIL = env("MAILGUN_SERVER_EMAIL")
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
