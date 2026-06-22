@@ -55,7 +55,35 @@ class Session(AbstractCreatedByUpdatedByModel):
     )
 
     def __str__(self):
-        return f'{self.client.full_name} with {self.coach.full_name}'
+        return f"{self.client.full_name} with {self.coach.full_name}"
+    
+class SessionNote(models.Model):
+    session = models.OneToOneField(Session, on_delete=models.CASCADE, related_name="notes")
+    summary = models.TextField(help_text="What was discussed?")
+    client_mindset = models.TextField(blank=True, null=True)
+    coach_observations = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Notes for {self.session.client.full_name}"
+
+class ActionItem(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name="action_items")
+    task = models.CharField(max_length=500)
+    description = models.TextField(blank=True, null=True)
+    due_date = models.DateField(null=True, blank=True)
+    is_completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Task for {self.session.client.full_name}: {self.task[:20]}"
+
+class Resource(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name="resources")
+    title = models.CharField(max_length=255)
+    link = models.URLField(blank=True, null=True)
+    file = models.FileField(upload_to="resources/", blank=True, null=True)
+
+    def __str__(self):
+        return self.title
 
 
 class Billing(AbstractCreatedByUpdatedByModel):

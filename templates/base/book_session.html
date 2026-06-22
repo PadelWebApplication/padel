@@ -23,15 +23,15 @@
         {% csrf_token %}
         <div class="col-lg-12 mb-3">
             <label for="name" class="mb-2">Full Name</label>
-            <input type="text" value="{{ coach.full_name }}" name="full_name" class="form-control" placeholder="John Doe" />
+            <input type="text" value="{{ client.full_name }}" name="full_name" class="form-control" placeholder="John Doe" />
         </div>
         <div class="col-lg-6 mb-3">
             <label for="name" class="mb-2">Email</label>
-            <input type="text" value="{{ coach.email }}" name="email" class="form-control" placeholder="johndoe@gmail.com" />
+            <input type="text" value="{{ client.email }}" name="email" class="form-control" placeholder="johndoe@gmail.com" />
         </div>
         <div class="col-lg-6 mb-3">
             <label for="name" class="mb-2">Mobile Number</label>
-            <input type="text" value="{{ coach.mobile }}" name="mobile" class="form-control" placeholder="+123 (456) 7890" />
+            <input type="text" value="{{ client.mobile }}" name="mobile" class="form-control" placeholder="+123 (456) 7890" />
         </div>
         <div class="col-lg-6 mb-3">
             <label for="name" class="mb-2">Gender</label>
