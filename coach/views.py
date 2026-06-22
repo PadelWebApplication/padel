@@ -36,7 +36,7 @@ def session_detail(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
     session = base_models.Session.objects.get(session_id=session_id, coach=coach)
 
-    session_note = base_models.SessionNote.objects.get(session=session)
+    session_note = base_models.SessionNote.objects.filter(session=session).first()
     action_items = base_models.ActionItem.objects.filter(session=session)
     resources = base_models.Resource.objects.filter(session=session)
 

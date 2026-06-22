@@ -11,7 +11,9 @@
                     {% csrf_token %}
                     <div class="col-lg-12 mb-3">
                         <label class="form-label">Profile Avatar</label>
-                        <p class="small text-muted">Current Avatar: {{ coach.image.url|default:"None" }}</p>
+                        {% if coach.image %}
+                        <p class="small text-muted">Current Avatar: {{ coach.image.url }}</p>
+                        {% endif %}
                         <input type="file" class="form-control" name="image" />
                     </div>
                     <div class="col-lg-12 mb-3">
