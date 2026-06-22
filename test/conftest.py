@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import patch
+from rest_framework.test import APIClient
 
 from base.models import Session, Service
 from client.models import Client
@@ -8,10 +9,17 @@ from userauths.models import User
 
 
 @pytest.fixture
+def api_client():
+    return APIClient()
+
+
+@pytest.fixture
 def user(db):
-    return User.objects.create_user(
+    user = User.objects.create_user(
         email='user@mail.com', password='Test@pass183810jdf_'
     )
+    user.raw_password = 'Test@pass183810jdf_'
+    return user
 
 
 @pytest.fixture
@@ -23,12 +31,7 @@ def client_user(db):
 
 @pytest.fixture
 def client(client_user):
-    return Client.objects.create(user=client_user)
-
-
-@pytest.fixture
-def coach(coach_user):
-    return Coach.objects.create(user=coach_user)
+    return Client.objects.create(user=client_user, full_name='Test Client')
 
 
 @pytest.fixture
@@ -39,13 +42,18 @@ def coach_user(db):
 
 
 @pytest.fixture
-def session(db, service, client, coach):
-    return Session.objects.create(service=service, coach=coach, client=client)
+def coach(coach_user):
+    return Coach.objects.create(user=coach_user, full_name='Test Coach')
 
 
 @pytest.fixture
 def service(db):
     return Service.objects.create(name='Test service', cost=10)
+
+
+@pytest.fixture
+def session(db, service, client, coach):
+    return Session.objects.create(service=service, coach=coach, client=client)
 
 
 @pytest.fixture

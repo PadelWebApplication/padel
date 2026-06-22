@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'userauths',
     'coach',
     'client',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
