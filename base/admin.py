@@ -3,6 +3,7 @@ from base import models
 
 from import_export.admin import ImportExportModelAdmin
 
+
 class SessionInline(admin.TabularInline):
     model = models.Session
     extra = 1
@@ -24,10 +25,12 @@ class BillingInline(admin.TabularInline):
     model = models.Billing
     extra = 1
 
+
 class ServiceAdmin(ImportExportModelAdmin):
     list_display = ["name", "cost"]
     search_fields = ["name", "description"]
     filter_horizontal = ["available_coaches"]
+
 
 class SessionAdmin(admin.ModelAdmin):
     list_display = ["client", "coach", "session_date", "status"]
@@ -53,4 +56,3 @@ admin.site.register(models.SessionNote, SessionNoteAdmin)
 admin.site.register(models.ActionItem, ActionItemAdmin)
 admin.site.register(models.Resource, ResourceAdmin)
 admin.site.register(models.Billing, BillingAdmin)
-
