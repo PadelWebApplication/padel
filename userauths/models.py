@@ -1,26 +1,67 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
 
-USER_TYPE = (
-    ("Coach", "Coach"),
-    ("Client", "Client"),
-)
+import uuid
+from functools import cached_property
 
-class User(AbstractUser):
-    email = models.EmailField(unique=True)
-    username = models.CharField(max_length=100, null=True, blank=True)
-    user_type = models.CharField(max_length=50, choices=USER_TYPE, null=True, blank=True, default=None)
+from core.db import AbstractCreatedByUpdatedByModel
+from core.managers import UsersManager
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ['username']
 
-    def __str__(self):
-        return self.username
+class User(AbstractUser, AbstractCreatedByUpdatedByModel):
+    """User entity."""
+
+    username = None  # type: ignore
+    first_name = None  # type: ignore
+    last_name = None  # type: ignore
+
+    email = models.EmailField(_('Email address'), unique=True)
+    last_activity = models.DateField(_('Last activity'), blank=True, null=True)
+    event_tracking_id = models.UUIDField(
+        _('Event Tracking ID'), default=uuid.uuid4, unique=True
+    )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS: list[str] = []
+
+    objects = UsersManager()
+
+    logging_tag = 'users'
+
+    class Meta:
+        """User meta info."""
+
+        verbose_name = _('user')
+        verbose_name_plural = _('users')
+        db_table = 'gulfstream-users_user'
 
     def save(self, *args, **kwargs):
-        email_username, _ = self.email.split("@")
-        if self.username == "" or self.username == None: 
-            self.username = email_username
+        """Save entity to database."""
+        if self.email:
+            self.email = self.email.lower()
+        return super().save(*args, **kwargs)
 
-        super(User, self).save(*args, **kwargs)
+    def activate(self):
+        """Activate user."""
+        self.is_active = True
+        self.save()
 
+    def deactivate(self):
+        """Deactivate user."""
+        self.is_active = False
+        self.save()
+
+    @cached_property
+    def date_format(self) -> str:
+        """Return user date format from preferences."""
+        return self.preferences.date_format.value
+
+    @cached_property
+    def time_format(self) -> str:
+        """Return user time format from preferences."""
+        return self.preferences.time_format.value
+
+    @cached_property
+    def timezone(self) -> str:
+        """Return user timezone str from preferences."""
+        return self.preferences.timezone.value
