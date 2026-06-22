@@ -1,92 +1,77 @@
-from django.shortcuts import render, redirect
-from django.contrib import messages
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render
 
-from userauths import forms as userauths_forms
-from userauths import models as userauths_models
+from userauths.serializers import RegisterSerializer, LoginSerializer
+from services.userauths.enum import UserTypeChoices
 from coach import models as coach_models
 from client import models as client_models
+from userauths.models import User
 
 
-def register_view(request):
-    if request.user.is_authenticated:
-        messages.success(request, "You are already logged in.")
-        return redirect("/")
-    
-    if request.method == "POST":
-        form = userauths_forms.UserRegisterForm(request.POST or None)
-    
-        if form.is_valid():
-            user = form.save()
-            full_name = form.cleaned_data.get("full_name")
-            email = form.cleaned_data.get("email")
-            password1 = form.cleaned_data.get("password1")
-            user_type = form.cleaned_data.get("user_type")
+class RegisterView(APIView):
+    def get(self, request):
+        return render(request, 'userauths/register.html')
 
-            user = authenticate(request, email=email, password=password1)
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
 
-            if user is not None:
-                login(request, user)
+        if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            password = serializer.validated_data.get('password')
+            full_name = serializer.validated_data.get('full_name')
+            user_type = serializer.validated_data.get('user_type')
 
-                if user_type == "Coach":
-                    coach_models.Coach.objects.create(user=user, full_name=full_name)
-                else:
-                    client_models.Client.objects.create(user=user, full_name=full_name, email=email)
+            user = User.objects.create_user(email=email, password=password)
 
-                messages.success(request, "Account created successfully.")
-                return redirect("/")
+            user_authenticate = authenticate(request, email=email, password=password)
+            login(request, user_authenticate)
+
+            if user_type == UserTypeChoices.coach:
+                coach_models.Coach.objects.create(user=user, full_name=full_name)
             else:
-                messages.error(request, "Authentication failed, please try again.")
-    else:
-        form = userauths_forms.UserRegisterForm()
+                client_models.Client.objects.create(
+                    user=user, full_name=full_name, email=email
+                )
 
-    context = {
-        "form": form
-    }
+            return Response(
+                {'message': 'Account created successfully'},
+                status=status.HTTP_201_CREATED,
+            )
 
-    return render(request, "userauths/sign-up.html", context)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def login_view(request):
-    if request.user.is_authenticated:
-        messages.success(request, "You are already logged in.")
-        return redirect("/")
-    
-    form = userauths_forms.LoginForm()
-    
-    if request.method == "POST":
-        form = userauths_forms.LoginForm(request.POST or None)
-        
-        if form.is_valid():
-            email = form.cleaned_data.get("email") 
-            password = form.cleaned_data.get("password") 
+class LoginView(APIView):
+    def get(self, request):
+        return render(request, 'userauths/login.html')
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+
+        if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            password = serializer.validated_data.get('password')
 
             user = authenticate(request, email=email, password=password)
 
             if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    
-                    messages.success(request, "Logged in successfully.")
-                    
-                    next_url = request.GET.get("next", "/")
-                    return redirect(next_url)
-                else:
-                    messages.error(request, "Username or password does not exist.")
+                login(request, user)
+                return Response(
+                    {'message': 'Login successful'}, status=status.HTTP_200_OK
+                )
             else:
-                messages.error(request, "Invalid email or password.")
-        else:
-            messages.error(request, "Please correct the errors below.")
+                return Response(
+                    {'message': 'Invalid credentials'},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
 
-    context = {
-        "form": form
-    }
-
-    return render(request, "userauths/sign-in.html", context)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def logout_view(request):
-    logout(request)
-    messages.success(request, "Logout successful.")
-    return redirect("userauths:sign-in")
-
+class LogoutView(APIView):
+    def post(self, request):
+        logout(request)
+        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)

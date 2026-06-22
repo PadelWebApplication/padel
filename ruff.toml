@@ -1,0 +1,4 @@
+exclude = ["venv", "migrations"]
+
+[format]
+quote-style = "single"
