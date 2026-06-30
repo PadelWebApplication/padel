@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('base', '0002_billing_client_service_available_coaches_and_more'),
+        ('base', '0005_alter_billing_status_and_more'),
     ]
 
     operations = [
