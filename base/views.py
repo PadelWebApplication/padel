@@ -14,6 +14,8 @@ from base import models as base_models
 from coach import models as coach_models
 from client import models as client_models
 from services.base.enum import BillingStatusChoices, SessionStatusChoices
+from services.coach.enum import NotificationTypeChoices as CoachNotificationTypeChoices
+from services.client.enum import NotificationTypeChoices as ClientNotificationTypeChoices
 
 def index(request):
     services = base_models.Service.objects.all()
@@ -140,13 +142,13 @@ def stripe_payment_verify(request, billing_id):
             coach_models.Notification.objects.create(
                 coach=billing.session.coach,
                 session=billing.session,
-                type="New Session"
+                type=CoachNotificationTypeChoices.new_session
             )
 
             client_models.Notification.objects.create(
                 client=billing.session.client,
                 session=billing.session,
-                type="Session Scheduled"
+                type=ClientNotificationTypeChoices.session_scheduled
             )
 
             try:
@@ -228,13 +230,13 @@ def paypal_payment_verify(request, billing_id):
                 coach_models.Notification.objects.create(
                     coach=billing.session.coach,
                     session=billing.session,
-                    type="New Session"
+                    type=CoachNotificationTypeChoices.new_session
                 )
 
                 client_models.Notification.objects.create(
                     client=billing.session.client,
                     session=billing.session,
-                    type="Session Scheduled"
+                    type=ClientNotificationTypeChoices.session_scheduled
                 )
 
                 try:
