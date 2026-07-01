@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from coach import models as coach_models
 from base import models as base_models
+from services.base.enum import BillingStatusChoices, SessionStatusChoices
 
 @login_required
 def dashboard(request):
@@ -55,7 +58,7 @@ def cancel_session(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
     session = base_models.Session.objects.get(session_id=session_id, coach=coach)
 
-    session.status = "Cancelled"
+    session.status = SessionStatusChoices.cancelled
     session.save()
 
     messages.success(request, "Session Cancelled Successfully")
@@ -67,7 +70,7 @@ def activate_session(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
     session = base_models.Session.objects.get(session_id=session_id, coach=coach)
 
-    session.status = "Scheduled"
+    session.status = SessionStatusChoices.scheduled
     session.save()
 
     messages.success(request, "Session Re-Scheduled Successfully")
@@ -78,7 +81,7 @@ def complete_session(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
     session = base_models.Session.objects.get(session_id=session_id, coach=coach)
 
-    session.status = "Completed"
+    session.status = SessionStatusChoices.completed
     session.save()
 
     messages.success(request, "Session Completed Successfully")
@@ -211,7 +214,7 @@ def edit_resource(request, session_id, resource_id):
 @login_required
 def payments(request):
     coach = coach_models.Coach.objects.get(user=request.user)
-    payments = base_models.Billing.objects.filter(session__coach=coach, status="Paid")
+    payments = base_models.Billing.objects.filter(session__coach=coach, status=BillingStatusChoices.paid)
 
     context = {
         "payments": payments,
@@ -247,6 +250,8 @@ def profile(request):
     coach = coach_models.Coach.objects.get(user=request.user)
     formatted_next_available_session_date = ""
     if coach.next_available_session_date:
+        if isinstance(coach.next_available_session_date, str):
+            coach.next_available_session_date = datetime.strptime(coach.next_available_session_date, '%Y-%m-%d').date()
         formatted_next_available_session_date = coach.next_available_session_date.strftime("%Y-%m-%d")
     
     if request.method == "POST":
@@ -261,16 +266,20 @@ def profile(request):
         next_available_session_date = request.POST.get("next_available_session_date")
 
         coach.full_name = full_name
-        coach.image = image
         coach.mobile = mobile
         coach.country = country
         coach.bio = bio
         coach.specialization = specialization
         coach.qualification = qualification
         coach.years_of_experience = years_of_experience
-        coach.next_available_session_date = next_available_session_date
 
-        if image != None:
+        if next_available_session_date:
+            coach.next_available_session_date = datetime.strptime(next_available_session_date, '%Y-%m-%d').date()
+        else:
+            coach.next_available_session_date = None
+        
+
+        if image is not None:
             coach.image = image
 
         coach.save()

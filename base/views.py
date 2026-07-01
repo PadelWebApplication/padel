@@ -13,6 +13,9 @@ import stripe
 from base import models as base_models
 from coach import models as coach_models
 from client import models as client_models
+from services.base.enum import BillingStatusChoices, SessionStatusChoices
+from services.coach.enum import NotificationTypeChoices as CoachNotificationTypeChoices
+from services.client.enum import NotificationTypeChoices as ClientNotificationTypeChoices
 
 def index(request):
     services = base_models.Service.objects.all()
@@ -67,7 +70,7 @@ def book_session(request, service_id, coach_id):
         billing.sub_total = session.service.cost
         billing.tax = session.service.cost * 5 / 100
         billing.total = billing.sub_total + billing.tax
-        billing.status = "Unpaid"
+        billing.status = BillingStatusChoices.unpaid
         billing.save()
 
         return redirect("base:checkout", billing.billing_id)
@@ -130,22 +133,22 @@ def stripe_payment_verify(request, billing_id):
     session = stripe.checkout.Session.retrieve(session_id)
 
     if session.payment_status == "paid":
-        if billing.status == "Unpaid":
-            billing.status = "Paid"
+        if billing.status == BillingStatusChoices.unpaid:
+            billing.status = BillingStatusChoices.paid
             billing.save()
-            billing.session.status = "Completed"
+            billing.session.status = SessionStatusChoices.scheduled
             billing.session.save()
 
             coach_models.Notification.objects.create(
                 coach=billing.session.coach,
                 session=billing.session,
-                type="New Session"
+                type=CoachNotificationTypeChoices.new_session
             )
 
             client_models.Notification.objects.create(
                 client=billing.session.client,
                 session=billing.session,
-                type="Session Scheduled"
+                type=ClientNotificationTypeChoices.session_scheduled
             )
 
             try:
@@ -218,22 +221,22 @@ def paypal_payment_verify(request, billing_id):
         paypal_payment_status = paypal_order_data["status"]
 
         if paypal_payment_status == "COMPLETED":
-            if billing.status == "Unpaid":
-                billing.status = "Paid"
+            if billing.status == BillingStatusChoices.unpaid:
+                billing.status = BillingStatusChoices.paid
                 billing.save()
-                billing.session.status = "Completed"
+                billing.session.status = SessionStatusChoices.scheduled
                 billing.session.save()
 
                 coach_models.Notification.objects.create(
                     coach=billing.session.coach,
                     session=billing.session,
-                    type="New Session"
+                    type=CoachNotificationTypeChoices.new_session
                 )
 
                 client_models.Notification.objects.create(
                     client=billing.session.client,
                     session=billing.session,
-                    type="Session Scheduled"
+                    type=ClientNotificationTypeChoices.session_scheduled
                 )
 
                 try:
@@ -271,7 +274,8 @@ def paypal_payment_verify(request, billing_id):
                 except Exception as e:
                     print(f"Email failed to send: {e}")
 
-                return redirect(f"/payment_status/{billing.billing_id}/?payment_status=paid")        
+                return redirect(f"/payment_status/{billing.billing_id}/?payment_status=paid")
+               
     return redirect(f"/payment_status/{billing.billing_id}/?payment_status=failed")
 
 

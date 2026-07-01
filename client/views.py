@@ -6,6 +6,7 @@ from marshmallow import ValidationError
 
 from client import models as client_models
 from base import models as base_models
+from services.base.enum import BillingStatusChoices, SessionStatusChoices
 
 @login_required
 def dashboard(request):
@@ -59,7 +60,7 @@ def cancel_session(request, session_id):
     client = client_models.Client.objects.get(user=request.user)
     session = base_models.Session.objects.get(session_id=session_id, client=client)
 
-    session.status = "Cancelled"
+    session.status = SessionStatusChoices.cancelled
     session.save()
 
     messages.success(request, "Session Cancelled Successfully")
@@ -69,7 +70,7 @@ def cancel_session(request, session_id):
 @login_required
 def payments(request):
     client = client_models.Client.objects.get(user=request.user)
-    payments = base_models.Billing.objects.filter(session__client=client, status="Paid")
+    payments = base_models.Billing.objects.filter(session__client=client, status=BillingStatusChoices.paid)
 
     context = {
         "payments": payments,

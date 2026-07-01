@@ -19,7 +19,7 @@
 </section>
 <section class="container">
     <div class="">
-        <h2 class="">Book Appointment</h2>
+        <h2 class="">Book Session</h2>
     </div>
     <form class="row" method="POST">
         {% csrf_token %}
@@ -44,7 +44,7 @@
         </div>
         <div class="col-lg-6 mb-3">
             <label for="name" class="mb-2">Date of Birth</label>
-            <input type="date" value="{{ client.dob }}" name="dob" class="form-control" />
+            <input type="date" value="{{ client.dob|date:'Y-m-d' }}" name="dob" class="form-control" />
         </div>
         <div class="col-lg-12 mb-3">
             <label for="name" class="mb-2">Address</label>

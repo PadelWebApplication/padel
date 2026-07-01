@@ -37,33 +37,22 @@
                             </li>
 
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Doctor Dashboard </a>
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Coach Dashboard </a>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="{% url "coach:dashboard" %}">Dashboard</a></li>
-                                    <li><a class="dropdown-item" href="/doctor/appointments.html">Sessions</a></li>
-                                    <li><a class="dropdown-item" href="/doctor/payments.html">Payments</a></li>
-                                    <li><a class="dropdown-item" href="/doctor/notifications.html">Notifications</a></li>
-                                    <li><a class="dropdown-item" href="/doctor/profile.html">Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url "coach:sessions" %}">Sessions</a></li>
+                                    <li><a class="dropdown-item" href="{% url "coach:payments" %}">Payments</a></li>
+                                    <li><a class="dropdown-item" href="{% url "coach:notifications" %}">Notifications</a></li>
                                 </ul>
                             </li>
 
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Patient Dashboard </a>
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Client Dashboard </a>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="{% url "client:dashboard" %}">Dashboard</a></li>
-                                    <li><a class="dropdown-item" href="/patient/appointments.html">Sessions</a></li>
-                                    <li><a class="dropdown-item" href="/patient/medical-reports.html">Session Reports</a></li>
-                                    <li><a class="dropdown-item" href="/patient/payments.html">Payments</a></li>
-                                    <li><a class="dropdown-item" href="/patient/notifications.html">Notifications</a></li>
-                                    <li><a class="dropdown-item" href="/patient/profile.html">Profile</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Pages </a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="/pages/about-us.html">About Us</a></li>
-                                    <li><a class="dropdown-item" href="/pages/contact-us.html">Contact Us</a></li>
+                                    <li><a class="dropdown-item" href="{% url "client:sessions" %}">Sessions</a></li>
+                                    <li><a class="dropdown-item" href="{% url "client:payments" %}">Payments</a></li>
+                                    <li><a class="dropdown-item" href="{% url "client:notifications" %}">Notifications</a></li>
                                 </ul>
                             </li>
                         </ul>

@@ -1,27 +1,28 @@
 {% extends 'partials/base.html' %}
+{% load static %}
 
 {% block content %}
 <section class="container">
     <div class="row d-flex justify-content-center align-items-center">
         <div class="col-12 col-lg-7 p-4 rounded-3 bg-white">
             <h1 class="display-4 fw-bold mt-5">
-                <span class="text-primary"><b>Extraordinary</b></span> Care is Right Here With <span class="text-primary">You.</span>
+                <span class="text-primary"><b>Your </b></span> Next Match <span class="text-primary">Starts Here.</span>
             </h1>
-            <p class="fs-4 mt-4">Every client is different, every smile is unique.</p>
+            <p class="fs-4 mt-4">Find your game. Find your people.</p>
             <div class="d-flex align-items-center gap-2 mt-5">
-                <button class="btn btn-primary btn-lg">Create Account <i class="fas fa-user-plus ms-1"></i></button>
-                <button class="btn btn-outline-primary btn-lg">Book Session <i class="fas fa-arrow-right ms-2"></i></button>
+                <a href="{% url 'userauths:register' %}"><button class="btn btn-primary btn-lg">Create Account <i class="fas fa-user-plus ms-1"></i></button></a>
+                <a href="#services"><button class="btn btn-outline-primary btn-lg">Book Session <i class="fas fa-arrow-right ms-2"></i></button></a>
             </div>
         </div>
         <div class="col-12 col-lg-5">
-            <img class="img-fluid mt-4" style="width: 100%; height: 350px; object-fit: cover; border-radius: 10px" src="https://indiaeducationdiary.in/wp-content/uploads/2024/03/GettyImages-1217096099-3.jpg" alt="" />
+            <img class="img-fluid mt-4" style="width: 100%; height: 350px; object-fit: cover; border-radius: 10px" src="{% static 'images/padel-rackets.jpg' %}" alt="" />
         </div>
     </div>
 </section>
-<section class="container mt-5">
+<section id="services" class="container mt-5">
     <div class="py-4">
         <h2 class="">Our Services</h2>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis, reiciendis.</p>
+        <p>Find the right coach and book a court session that fits your schedule and skill level.</p>
     </div>
     <div class="row">
         {% for item in services %}
@@ -50,16 +51,15 @@
     <div class="row d-flex align-items-center">
         <div class="col-lg-6">
             <h1 class="fw-bold">Get Session Now!</h1>
-            <p class="text-secondary">Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus et voluptate omnis accusantium. Tenetur explicabo vero quo dolore. Repudiandae itaque accusantium dolor ab. Blanditiis esse tempore ut ad accusantium nihil?</p>
+            <p class="text-secondary">Whether you're just starting out or looking to sharpen your competitive edge, our coaches are here to help. Book a personal or group session today and take your padel game to the next level. Flexible scheduling, professional guidance, and a community that loves the game as much as you do.</p>
 
             <div class="d-flex align-items-center gap-2 mt-5">
-                <button class="btn btn-outline-primary"><i class="fas fa-video ms-1"></i> View Services</button>
-                <button class="btn btn-primary">Create Account <i class="fas fa-user-plus ms-1"></i></button>
-                <button class="btn btn-primary">Learn More <i class="fas fa-arrow-right ms-1"></i></button>
+                <a href="#services"><button class="btn btn-outline-primary">View Services <i class="fas fa-video ms-1"></i></button></a>
+                <a href="{% url 'userauths:register' %}"><button class="btn btn-primary">Create Account <i class="fas fa-user-plus ms-1"></i></button></a>
             </div>
         </div>
         <div class="col-lg-6">
-            <img src="https://www.mckenzielake.com/wp-content/uploads/2022/06/iStock-1299777111.jpg" class="img-fluid rounded" style="height: 400px" alt="" />
+            <img src="{% static 'images/racket.jpg' %}" class="img-fluid rounded" style="height: 400px" alt="" />
         </div>
     </div>
 </section>
