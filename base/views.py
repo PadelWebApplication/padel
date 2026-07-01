@@ -13,6 +13,7 @@ import stripe
 from base import models as base_models
 from coach import models as coach_models
 from client import models as client_models
+from services.base.enum import BillingStatusChoices
 
 def index(request):
     services = base_models.Service.objects.all()
@@ -67,7 +68,7 @@ def book_session(request, service_id, coach_id):
         billing.sub_total = session.service.cost
         billing.tax = session.service.cost * 5 / 100
         billing.total = billing.sub_total + billing.tax
-        billing.status = "Unpaid"
+        billing.status = BillingStatusChoices.unpaid
         billing.save()
 
         return redirect("base:checkout", billing.billing_id)
