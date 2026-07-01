@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -248,6 +250,8 @@ def profile(request):
     coach = coach_models.Coach.objects.get(user=request.user)
     formatted_next_available_session_date = ""
     if coach.next_available_session_date:
+        if isinstance(coach.next_available_session_date, str):
+            coach.next_available_session_date = datetime.strptime(coach.next_available_session_date, '%Y-%m-%d').date()
         formatted_next_available_session_date = coach.next_available_session_date.strftime("%Y-%m-%d")
     
     if request.method == "POST":
@@ -262,14 +266,18 @@ def profile(request):
         next_available_session_date = request.POST.get("next_available_session_date")
 
         coach.full_name = full_name
-        coach.image = image
         coach.mobile = mobile
         coach.country = country
         coach.bio = bio
         coach.specialization = specialization
         coach.qualification = qualification
         coach.years_of_experience = years_of_experience
-        coach.next_available_session_date = next_available_session_date
+
+        if next_available_session_date:
+            coach.next_available_session_date = datetime.strptime(next_available_session_date, '%Y-%m-%d').date()
+        else:
+            coach.next_available_session_date = None
+        
 
         if image is not None:
             coach.image = image
