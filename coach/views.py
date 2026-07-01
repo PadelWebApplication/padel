@@ -271,7 +271,7 @@ def profile(request):
         coach.years_of_experience = years_of_experience
         coach.next_available_session_date = next_available_session_date
 
-        if image != None:
+        if image is not None:
             coach.image = image
 
         coach.save()
