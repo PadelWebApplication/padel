@@ -4,9 +4,9 @@
     <div class="container">
         <div class="row mt-0 mt-md-4">
             {% include "client/sidebar.html" %}
-            {% for session in sessions %}
             <div class="col-lg-9 col-md-8 col-12">
                 <h4 class="mb-0 mb-4 fw-bold">Ticket</h4>
+                {% for session in sessions %}
                 <div class="card mb-4">
                     <div class="shadow border p-3 mb-4 rounded-4">
                         <a href="{% url "client:session_detail" session.session_id %}">
@@ -19,8 +19,8 @@
                         </a>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </div>
 </section>
