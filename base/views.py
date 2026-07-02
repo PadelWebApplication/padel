@@ -307,6 +307,19 @@ def stripe_payment_verify(request, billing_id):
                     msg.attach_alternative(html_body, "text/html")
                     msg.send()
 
+                    if billing.session.client:
+                        subject = "Session Booked Successfully"
+                        text_body = render_to_string("email/session_booked.txt", merge_data)
+                        html_body = render_to_string("email/session_booked.html", merge_data)
+                        msg = EmailMultiAlternatives(
+                            subject=subject,
+                            from_email=settings.FROM_EMAIL,
+                            to=[billing.session.client.email],
+                            body=text_body
+                        )
+                        msg.attach_alternative(html_body, "text/html")
+                        msg.send()
+
                 send_invoice_email(billing)
             except Exception as e:
                 print(f"Email failed to send: {e}")

@@ -2,29 +2,80 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
-            body { font-family: Arial, sans-serif; background: #f4f4f4; color: #222; padding: 20px; }
-            .invoice { background: #fff; max-width: 640px; margin: 0 auto; padding: 24px; border-radius: 8px; }
-            .row { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0; }
-            h1 { margin-top: 0; color: #0d6efd; }
-            .total { font-size: 20px; font-weight: bold; }
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                color: #333;
+                margin: 0;
+                padding: 20px;
+            }
+            .email-container {
+                background-color: #ffffff;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            h1 {
+                font-size: 24px;
+                color: #0056b3;
+                margin-bottom: 20px;
+            }
+            p {
+                font-size: 16px;
+                line-height: 1.6;
+                margin-bottom: 10px;
+            }
+            h3 {
+                font-size: 18px;
+                color: #0056b3;
+                margin-top: 30px;
+                margin-bottom: 10px;
+            }
+            .info-section {
+                margin-bottom: 20px;
+            }
+            .info-section p {
+                margin: 5px 0;
+            }
+            b {
+                color: #333;
+            }
+            .total {
+                font-size: 20px;
+                font-weight: bold;
+                color: #0056b3;
+            }
+            .footer-text {
+                font-size: 14px;
+                color: #999999;
+                margin-top: 30px;
+                text-align: center;
+            }
         </style>
     </head>
     <body>
-        <div class="invoice">
+        <div class="email-container">
             <h1>LEO PADEL ACADEMY Invoice</h1>
-            <p>Thank you for booking your ticket.</p>
-
-            <div class="row"><strong>Invoice ID</strong><span>{{ billing.billing_id }}</span></div>
-            <div class="row"><strong>Event</strong><span>{{ billing.session.service.name }}</span></div>
-            <div class="row"><strong>Ticket holder</strong><span>{{ billing.buyer_name }}</span></div>
-            <div class="row"><strong>Email</strong><span>{{ billing.recipient_email }}</span></div>
-            <div class="row"><strong>Status</strong><span>{{ billing.status }}</span></div>
-            <div class="row"><strong>Subtotal</strong><span>{{ billing.sub_total }} {{ payment_currency }}</span></div>
-            <div class="row"><strong>VAT</strong><span>{{ billing.tax }} {{ payment_currency }}</span></div>
-            <div class="row total"><strong>Total</strong><span>{{ billing.total }} {{ payment_currency }}</span></div>
-
-            <p>Your ticket is confirmed after successful payment.</p>
+            <p>Thank you for booking your session.</p>
+            <div class="info-section">
+                <h3><b>Session Details</b></h3>
+                <p><b>Invoice ID:</b> {{ billing.billing_id }}</p>
+                <p><b>Event:</b> {{ billing.session.service.name }}</p>
+                <p><b>Ticket Holder:</b> {{ billing.buyer_name }}</p>
+                <p><b>Email:</b> {{ billing.recipient_email }}</p>
+            </div>
+            <div class="info-section">
+                <h3><b>Payment Details</b></h3>
+                <p><b>Status:</b> {{ billing.status }}</p>
+                <p><b>Subtotal:</b> {{ billing.sub_total }} {{ payment_currency }}</p>
+                <p><b>VAT:</b> {{ billing.tax }} {{ payment_currency }}</p>
+                <p class="total"><b>Total:</b> {{ billing.total }} {{ payment_currency }}</p>
+            </div>
+            <p class="footer-text">Your ticket is confirmed after successful payment.</p>
         </div>
     </body>
 </html>
