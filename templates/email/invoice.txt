@@ -1,0 +1,12 @@
+LEO PADEL ACADEMY Invoice
+
+Invoice ID: {{ billing.billing_id }}
+Event: {{ billing.session.service.name }}
+Ticket holder: {{ billing.buyer_name }}
+Email: {{ billing.recipient_email }}
+Status: {{ billing.status }}
+Subtotal: {{ billing.sub_total }} {{ payment_currency }}
+VAT: {{ billing.tax }} {{ payment_currency }}
+Total: {{ billing.total }} {{ payment_currency }}
+
+Thank you for booking your ticket.

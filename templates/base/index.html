@@ -2,64 +2,102 @@
 {% load static %}
 
 {% block content %}
-<section class="container">
-    <div class="row d-flex justify-content-center align-items-center">
-        <div class="col-12 col-lg-7 p-4 rounded-3 bg-white">
-            <h1 class="display-4 fw-bold mt-5">
-                <span class="text-primary"><b>Your </b></span> Next Match <span class="text-primary">Starts Here.</span>
-            </h1>
-            <p class="fs-4 mt-4">Find your game. Find your people.</p>
-            <div class="d-flex align-items-center gap-2 mt-5">
-                <a href="{% url 'userauths:register' %}"><button class="btn btn-primary btn-lg">Create Account <i class="fas fa-user-plus ms-1"></i></button></a>
-                <a href="#services"><button class="btn btn-outline-primary btn-lg">Book Session <i class="fas fa-arrow-right ms-2"></i></button></a>
+<section class="figma-hero" style="background-image: url('{% static 'images/padel-rackets.jpg' %}');">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="figma-title mt-3">Padel Academy</h1>
+                <p class="figma-copy mt-4">Choose upcoming padel games, week-long camps, and academy events. Tickets are limited, paid in AED, and invoices are sent by email.</p>
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3 mt-5">
+                    <a href="#services" class="btn btn-light btn-lg">View Events <i class="fas fa-arrow-right ms-2"></i></a>
+                    {% if not request.user.is_authenticated %}
+                        <a href="{% url 'userauths:register' %}" class="btn btn-outline-light btn-lg">Create Account <i class="fas fa-user-plus ms-1"></i></a>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-        <div class="col-12 col-lg-5">
-            <img class="img-fluid mt-4" style="width: 100%; height: 350px; object-fit: cover; border-radius: 10px" src="{% static 'images/padel-rackets.jpg' %}" alt="" />
         </div>
     </div>
 </section>
-<section id="services" class="container mt-5">
-    <div class="py-4">
-        <h2 class="">Our Services</h2>
-        <p>Find the right coach and book a court session that fits your schedule and skill level.</p>
+
+<section id="services" class="container mt-4">
+    <div class="py-3 d-flex flex-column flex-lg-row justify-content-between gap-3">
+        <div>
+            <h2 class="section-heading mb-0">Upcoming Games & Camps</h2>
+        </div>
     </div>
-    <div class="row">
+    <div class="row g-4">
         {% for item in services %}
-        <div class="col-lg-3">
-            <div class="card mb-4 shadow">
-                <a href="{% url 'base:service_detail' item.id %}">
-                    <img src="{{ item.image.url }}" alt="No image" class="card-img-top" />
-                </a>
+        <div class="col-lg-3 col-md-6 d-flex">
+            <div class="card event-card w-100">
+                {% if item.image %}
+                    <a href="{% url 'base:service_detail' item.id %}">
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="card-img-top" />
+                    </a>
+                {% else %}
+                    <a href="{% url 'base:service_detail' item.id %}">
+                        <img src="{% static 'images/racket.jpg' %}" alt="{{ item.name }}" class="card-img-top" />
+                    </a>
+                {% endif %}
                 <div class="card-body">
-                    <h4 class="mb-2 text-truncate-line-2"><a href="{% url 'base:service_detail' item.id %}" class="text-inherit text-dark text-decoration-none">{{ item.name }}</a></h4>
-                    <div class="mt-2">
-                        <p>{{ item.description|truncatechars:40 }}</p>
-                        <span class="fw-semibold">Coaches Available: {{ item.available_coaches.all.count }}</span>
+                    <div class="mb-2">
+                        <span class="badge {% if item.type == 'camp' %}bg-success{% else %}bg-primary{% endif %}">{{ item.get_type_display }}</span>
+                    </div>
+                    <h4 class="event-title"><a href="{% url 'base:service_detail' item.id %}" class="text-inherit text-dark text-decoration-none">{{ item.name }}</a></h4>
+                    <div class="d-flex flex-column flex-grow-1">
+                        <span class="event-format fw-semibold">{% if item.type == 'camp' %}Week-long academy program{% else %}Padel game ticket{% endif %}</span>
+                        <p class="event-ticket-meta small text-muted mt-2 mb-0">
+                            {% if item.available_tickets_count == None %}
+                                Unlimited tickets
+                            {% elif item.is_sold_out %}
+                                Sold out
+                            {% else %}
+                                {{ item.available_tickets_count }} tickets left
+                            {% endif %}
+                        </p>
                         <div class="lh-1 mt-3">
-                            <span class="text-dark fw-bold fs-4">{{ item.cost }}</span>
+                            <span class="text-dark fw-bold fs-4">{{ item.cost }} AED</span>
                         </div>
-                        <a href="{% url 'base:service_detail' item.id %}" class="btn btn-sm btn-primary mt-3">Book Session <i class="fas fa-arrow-right ms-2"></i></a>
+                        <div class="event-actions d-flex flex-wrap gap-2 pt-3">
+                            <a href="{% url 'base:service_detail' item.id %}" class="btn btn-sm btn-outline-primary">Details</a>
+                            {% if item.is_sold_out %}
+                                <button class="btn btn-sm btn-secondary" disabled>Sold Out</button>
+                            {% else %}
+                                <a href="{% url 'base:buy_ticket' item.id %}" class="btn btn-sm btn-primary">Buy Ticket <i class="fas fa-ticket-alt ms-2"></i></a>
+                                {% if request.user.is_authenticated %}
+                                    <a href="{% url 'base:reserve_cash_ticket' item.id %}" class="btn btn-sm btn-outline-primary">Reserve Cash <i class="fas fa-money-bill-wave ms-2"></i></a>
+                                {% endif %}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="shadow p-4 rounded-3 text-center">
+                <h3>No events yet</h3>
+                <p class="text-secondary mb-0">Create events in the admin panel and they will appear here.</p>
             </div>
         </div>
         {% endfor %}
     </div>
 </section>
-<section class="container mt-5">
-    <div class="row d-flex align-items-center">
-        <div class="col-lg-6">
-            <h1 class="fw-bold">Get Session Now!</h1>
-            <p class="text-secondary">Whether you're just starting out or looking to sharpen your competitive edge, our coaches are here to help. Book a personal or group session today and take your padel game to the next level. Flexible scheduling, professional guidance, and a community that loves the game as much as you do.</p>
 
-            <div class="d-flex align-items-center gap-2 mt-5">
-                <a href="#services"><button class="btn btn-outline-primary">View Services <i class="fas fa-video ms-1"></i></button></a>
-                <a href="{% url 'userauths:register' %}"><button class="btn btn-primary">Create Account <i class="fas fa-user-plus ms-1"></i></button></a>
+<section class="container mt-4">
+    <div class="row d-flex align-items-center soft-detail-panel p-3 p-lg-5">
+        <div class="col-lg-6">
+            <h1 class="section-heading">Play, train, compete.</h1>
+            <p class="text-secondary">LEO PADEL ACADEMY brings together social games, focused training camps, and competitive events. Each listing includes the format, price, and event description so players can choose the right experience.</p>
+
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2 mt-5">
+                <a href="#services" class="btn btn-outline-primary">View Events <i class="fas fa-video ms-1"></i></a>
+                {% if not request.user.is_authenticated %}
+                    <a href="{% url 'userauths:register' %}" class="btn btn-primary">Create Account <i class="fas fa-user-plus ms-1"></i></a>
+                {% endif %}
             </div>
         </div>
         <div class="col-lg-6">
-            <img src="{% static 'images/racket.jpg' %}" class="img-fluid rounded" style="height: 400px" alt="" />
+            <img src="{% static 'images/racket.jpg' %}" class="img-fluid rounded-4" style="width: 100%; height: 400px; object-fit: cover" alt="Padel racket" />
         </div>
     </div>
 </section>

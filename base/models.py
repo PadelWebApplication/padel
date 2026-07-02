@@ -6,19 +6,51 @@ from django_enum.fields import EnumCharField
 
 from coach import models as coach_models
 from client import models as client_models
-from services.base.enum import SessionStatusChoices, BillingStatusChoices
+from services.base.enum import (
+    BillingStatusChoices,
+    ServiceTypeChoices,
+    SessionStatusChoices,
+)
 from core.db import AbstractCreatedByUpdatedByModel
 
 
 class Service(AbstractCreatedByUpdatedByModel):
     image = models.FileField(upload_to='images', null=True, blank=True)
+    type = EnumCharField(
+        enum=ServiceTypeChoices,
+        default=ServiceTypeChoices.event,
+        verbose_name=_('Type'),
+        max_length=16,
+    )
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2)
+    max_tickets = models.PositiveIntegerField(null=True, blank=True)
     available_coaches = models.ManyToManyField(coach_models.Coach, blank=True)
+
+    class Meta:
+        verbose_name = 'Event or Camp'
+        verbose_name_plural = 'Events and Camps'
 
     def __str__(self):
         return f'{self.name} - {self.cost}'
+
+    @property
+    def sold_tickets_count(self):
+        return Billing.objects.filter(
+            session__service=self,
+            status__in=[BillingStatusChoices.paid, BillingStatusChoices.reserved],
+        ).count()
+
+    @property
+    def available_tickets_count(self):
+        if self.max_tickets is None:
+            return None
+        return max(self.max_tickets - self.sold_tickets_count, 0)
+
+    @property
+    def is_sold_out(self):
+        return self.max_tickets is not None and self.available_tickets_count == 0
 
 
 class Session(AbstractCreatedByUpdatedByModel):
@@ -55,7 +87,10 @@ class Session(AbstractCreatedByUpdatedByModel):
     )
 
     def __str__(self):
-        return f"{self.client.full_name} with {self.coach.full_name}"
+        client_name = self.client.full_name if self.client else "Client"
+        service_name = self.service.name if self.service else "Event"
+        coach_name = self.coach.full_name if self.coach else service_name
+        return f"{client_name} with {coach_name}"
     
 class SessionNote(models.Model):
     session = models.OneToOneField(Session, on_delete=models.CASCADE, related_name="notes")
@@ -97,6 +132,7 @@ class Billing(AbstractCreatedByUpdatedByModel):
     session = models.ForeignKey(
         Session, on_delete=models.CASCADE, related_name='billing', blank=True, null=True
     )
+    guest_email = models.EmailField(blank=True, null=True)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2)
     total = models.DecimalField(max_digits=10, decimal_places=2)
@@ -112,5 +148,17 @@ class Billing(AbstractCreatedByUpdatedByModel):
 
     date = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def recipient_email(self):
+        if self.client and self.client.email:
+            return self.client.email
+        return self.guest_email
+
+    @property
+    def buyer_name(self):
+        if self.client and self.client.full_name:
+            return self.client.full_name
+        return self.recipient_email or "Guest"
+
     def __str__(self):
-        return f'Billing for {self.client.full_name} - Total: {self.total}'
+        return f'Billing for {self.buyer_name} - Total: {self.total}'

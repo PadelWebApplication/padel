@@ -13,9 +13,4 @@ class CoachAdmin(admin.ModelAdmin):
     ]
 
 
-class NotificationAdmin(admin.ModelAdmin):
-    list_display = ['coach', 'session', 'type', 'seen', 'date']
-
-
 admin.site.register(models.Coach, CoachAdmin)
-admin.site.register(models.Notification, NotificationAdmin)

@@ -63,18 +63,20 @@
     <body>
         <div class="email-container">
             <h1>Hi {{billing.session.client.full_name}}</h1>
-            <p>Your session with Coach {{billing.session.coach.full_name}} was successfully scheduled</p>
+            <p>Your booking for {{ billing.session.service.name }} was successfully scheduled</p>
 
             <div class="info-section">
                 <h3><b>Service</b></h3>
                 <p><b>Service:</b> {{ billing.session.service.name }}</p>
             </div>
 
-            <div class="info-section">
-                <h3><b>Coach Bio Data</b></h3>
-                <p><b>Full Name:</b> {{billing.session.coach.full_name}}</p>
-                <p><b>Email:</b>  {{billing.session.coach.user.email}}</p>
-            </div>
+            {% if billing.session.coach %}
+                <div class="info-section">
+                    <h3><b>Coach Bio Data</b></h3>
+                    <p><b>Full Name:</b> {{billing.session.coach.full_name}}</p>
+                    <p><b>Email:</b>  {{billing.session.coach.user.email}}</p>
+                </div>
+            {% endif %}
 
             <div class="info-section">
                 <h3><b>Session Details</b></h3>
@@ -86,7 +88,7 @@
             <div class="info-section">
                 <h3><b>Billing Details</b></h3>
                 <p><b>Billing ID:</b> {{billing.billing_id}}</p>
-                <p><b>Price:</b> ${{billing.sub_total}}</p>
+                <p><b>Price:</b> {{billing.sub_total}} AED</p>
                 <p><b>Status:</b> {{billing.status}}</p>
             </div>
 

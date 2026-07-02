@@ -8,12 +8,20 @@ from client import models as client_models
 from base import models as base_models
 from services.base.enum import BillingStatusChoices, SessionStatusChoices
 
+ACTIVE_TICKET_STATUSES = [BillingStatusChoices.paid, BillingStatusChoices.reserved]
+
 @login_required
 def dashboard(request):
     client = client_models.Client.objects.get(user=request.user)
-    sessions = base_models.Session.objects.filter(client=client)
+    sessions = base_models.Session.objects.filter(
+        client=client,
+        billing__status__in=ACTIVE_TICKET_STATUSES,
+    ).distinct()
     notifications = client_models.Notification.objects.filter(client=client, seen=False)
-    total_spent = base_models.Billing.objects.filter(client=client).aggregate(total_spent=models.Sum("total"))["total_spent"]
+    total_spent = base_models.Billing.objects.filter(
+        client=client,
+        status=BillingStatusChoices.paid,
+    ).aggregate(total_spent=models.Sum("total"))["total_spent"]
 
     context = {
         "sessions": sessions,
@@ -27,7 +35,10 @@ def dashboard(request):
 @login_required
 def sessions(request):
     client = client_models.Client.objects.get(user=request.user)
-    sessions = base_models.Session.objects.filter(client=client)
+    sessions = base_models.Session.objects.filter(
+        client=client,
+        billing__status__in=ACTIVE_TICKET_STATUSES,
+    ).distinct()
 
     context = {
         "sessions": sessions,
@@ -39,7 +50,11 @@ def sessions(request):
 @login_required
 def session_detail(request, session_id):
     client = client_models.Client.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, client=client)
+    session = base_models.Session.objects.get(
+        session_id=session_id,
+        client=client,
+        billing__status__in=ACTIVE_TICKET_STATUSES,
+    )
 
     session_note = base_models.SessionNote.objects.filter(session=session).first()
     action_items = base_models.ActionItem.objects.filter(session=session)
@@ -58,7 +73,11 @@ def session_detail(request, session_id):
 @login_required
 def cancel_session(request, session_id):
     client = client_models.Client.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, client=client)
+    session = base_models.Session.objects.get(
+        session_id=session_id,
+        client=client,
+        billing__status__in=ACTIVE_TICKET_STATUSES,
+    )
 
     session.status = SessionStatusChoices.cancelled
     session.save()

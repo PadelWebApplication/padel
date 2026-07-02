@@ -142,7 +142,7 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LOGIN_URL = '/'
+LOGIN_URL = '/auth/login/'
 
 LOGIN_REDIRECT_URL = '/'
 
@@ -170,8 +170,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 
-PAYPAL_CLIENT_ID = env("PAYPAL_CLIENT_ID")
-PAYPAL_SECRET_ID = env("PAYPAL_SECRET_ID")
+PAYMENT_CURRENCY = "AED"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

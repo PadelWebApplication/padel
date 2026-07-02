@@ -3,7 +3,6 @@ import pytest
 from userauths.models import User
 from coach.models import Coach
 from client.models import Client
-from services.userauths.enum import UserTypeChoices
 
 
 @pytest.mark.django_db
@@ -13,16 +12,17 @@ def test_register_get(api_client):
 
 
 @pytest.mark.django_db
-def test_register_coach(api_client):
+def test_register_does_not_create_coach_profile(api_client):
     response = api_client.post('/auth/register/', {
         'email': 'coach@mail.com',
         'password': 'Test@pass123',
         'full_name': 'Test Coach',
-        'user_type': UserTypeChoices.coach
     })
-    assert response.status_code == 201
+    assert response.status_code == 302
+    assert response.url == '/client/'
     assert User.objects.filter(email='coach@mail.com').exists()
-    assert Coach.objects.filter(user__email='coach@mail.com').exists()
+    assert not Coach.objects.filter(user__email='coach@mail.com').exists()
+    assert Client.objects.filter(user__email='coach@mail.com').exists()
 
 
 @pytest.mark.django_db
@@ -31,9 +31,9 @@ def test_register_client(api_client):
         'email': 'client@mail.com',
         'password': 'Test@pass123',
         'full_name': 'Test Client',
-        'user_type': UserTypeChoices.client
     })
-    assert response.status_code == 201
+    assert response.status_code == 302
+    assert response.url == '/client/'
     assert User.objects.filter(email='client@mail.com').exists()
     assert Client.objects.filter(user__email='client@mail.com').exists()
 
@@ -63,12 +63,48 @@ def test_login_get(api_client):
 
 @pytest.mark.django_db
 def test_login(api_client, user):
+    Client.objects.create(user=user, full_name='Test Client', email=user.email)
+
     response = api_client.post('/auth/login/', {
         'email': user.email,
         'password': user.raw_password
     })
-    assert response.status_code == 200
+    assert response.status_code == 302
+    assert response.url == '/client/'
     assert User.objects.filter(email=user.email).exists()
+
+
+@pytest.mark.django_db
+def test_login_redirects_to_next_url(api_client):
+    user = User.objects.create_user(
+        email='next-login@mail.com', password='Test@pass123'
+    )
+
+    response = api_client.post('/auth/login/?next=/service/1/buy_ticket/', {
+        'email': user.email,
+        'password': 'Test@pass123'
+    })
+
+    assert response.status_code == 302
+    assert response.url == '/service/1/buy_ticket/'
+
+
+@pytest.mark.django_db
+def test_forgot_password_updates_password(api_client):
+    user = User.objects.create_user(
+        email='reset@mail.com', password='OldPass123'
+    )
+
+    response = api_client.post('/auth/forgot-password/', {
+        'email': user.email,
+        'password': 'NewPass123',
+        'confirm_password': 'NewPass123',
+    })
+
+    user.refresh_from_db()
+    assert response.status_code == 302
+    assert response.url == '/auth/login/'
+    assert user.check_password('NewPass123')
 
 
 @pytest.mark.django_db
@@ -90,4 +126,5 @@ def test_logout_get(api_client):
 def test_logout(api_client, user):
     api_client.force_login(user)
     response = api_client.post('/auth/logout/')
-    assert response.status_code == 200
+    assert response.status_code == 302
+    assert response.url == '/'

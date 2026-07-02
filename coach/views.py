@@ -11,7 +11,10 @@ from services.base.enum import BillingStatusChoices, SessionStatusChoices
 @login_required
 def dashboard(request):
     coach = coach_models.Coach.objects.get(user=request.user)
-    sessions = base_models.Session.objects.filter(coach=coach)
+    sessions = base_models.Session.objects.filter(
+        coach=coach,
+        billing__status=BillingStatusChoices.paid,
+    ).distinct()
     notifications = coach_models.Notification.objects.filter(coach=coach)
 
     context = {
@@ -25,7 +28,10 @@ def dashboard(request):
 @login_required
 def sessions(request):
     coach = coach_models.Coach.objects.get(user=request.user)
-    sessions = base_models.Session.objects.filter(coach=coach)
+    sessions = base_models.Session.objects.filter(
+        coach=coach,
+        billing__status=BillingStatusChoices.paid,
+    ).distinct()
 
     context = {
         "sessions": sessions,
@@ -37,7 +43,7 @@ def sessions(request):
 @login_required
 def session_detail(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach, billing__status=BillingStatusChoices.paid)
 
     session_note = base_models.SessionNote.objects.filter(session=session).first()
     action_items = base_models.ActionItem.objects.filter(session=session)
@@ -56,7 +62,7 @@ def session_detail(request, session_id):
 @login_required
 def cancel_session(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach, billing__status=BillingStatusChoices.paid)
 
     session.status = SessionStatusChoices.cancelled
     session.save()
@@ -68,7 +74,7 @@ def cancel_session(request, session_id):
 @login_required
 def activate_session(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach, billing__status=BillingStatusChoices.paid)
 
     session.status = SessionStatusChoices.scheduled
     session.save()
@@ -79,7 +85,7 @@ def activate_session(request, session_id):
 @login_required
 def complete_session(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach, billing__status=BillingStatusChoices.paid)
 
     session.status = SessionStatusChoices.completed
     session.save()
@@ -91,7 +97,7 @@ def complete_session(request, session_id):
 @login_required
 def add_session_note(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach, billing__status=BillingStatusChoices.paid)
 
     if request.method == "POST":
         summary = request.POST.get("summary")
@@ -108,7 +114,7 @@ def add_session_note(request, session_id):
 @login_required
 def edit_session_note(request, session_id, session_note_id):
     coach = coach_models.Coach.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach, billing__status=BillingStatusChoices.paid)
     session_note = base_models.SessionNote.objects.get(id=session_note_id, session=session)
 
     if request.method == "POST":
@@ -127,7 +133,7 @@ def edit_session_note(request, session_id, session_note_id):
 @login_required
 def add_action_item(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach, billing__status=BillingStatusChoices.paid)
 
     if request.method == "POST":
         task = request.POST.get("task")
@@ -150,7 +156,7 @@ def add_action_item(request, session_id):
 @login_required
 def edit_action_item(request, session_id, action_item_id):
     coach = coach_models.Coach.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach, billing__status=BillingStatusChoices.paid)
     action_item = base_models.ActionItem.objects.get(id=action_item_id, session=session)
 
     if request.method == "POST":
@@ -172,7 +178,7 @@ def edit_action_item(request, session_id, action_item_id):
 @login_required
 def add_resource(request, session_id):
     coach = coach_models.Coach.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach, billing__status=BillingStatusChoices.paid)
 
     if request.method == "POST":
         title = request.POST.get("title")
@@ -193,7 +199,7 @@ def add_resource(request, session_id):
 @login_required
 def edit_resource(request, session_id, resource_id):
     coach = coach_models.Coach.objects.get(user=request.user)
-    session = base_models.Session.objects.get(session_id=session_id, coach=coach)
+    session = base_models.Session.objects.get(session_id=session_id, coach=coach, billing__status=BillingStatusChoices.paid)
     resource = base_models.Resource.objects.get(id=resource_id, session=session)
 
     if request.method == "POST":

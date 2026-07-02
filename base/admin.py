@@ -4,6 +4,11 @@ from base import models
 from import_export.admin import ImportExportModelAdmin
 
 
+admin.site.site_header = "LEO PADEL ACADEMY Admin"
+admin.site.site_title = "LEO PADEL ACADEMY"
+admin.site.index_title = "Manage academy events, camps and bookings"
+
+
 class SessionInline(admin.TabularInline):
     model = models.Session
     extra = 1
@@ -27,9 +32,46 @@ class BillingInline(admin.TabularInline):
 
 
 class ServiceAdmin(ImportExportModelAdmin):
-    list_display = ["name", "cost"]
+    list_display = [
+        "name",
+        "type",
+        "cost",
+        "max_tickets",
+        "sold_tickets",
+        "available_tickets",
+        "has_image",
+        "coach_count",
+    ]
+    list_filter = ["type"]
     search_fields = ["name", "description"]
+    fields = [
+        "type",
+        "name",
+        "description",
+        "cost",
+        "max_tickets",
+        "image",
+        "available_coaches",
+    ]
     filter_horizontal = ["available_coaches"]
+
+    @admin.display(boolean=True, description="Image")
+    def has_image(self, obj):
+        return bool(obj.image)
+
+    @admin.display(description="Coaches")
+    def coach_count(self, obj):
+        return obj.available_coaches.count()
+
+    @admin.display(description="Reserved/Paid")
+    def sold_tickets(self, obj):
+        return obj.sold_tickets_count
+
+    @admin.display(description="Available")
+    def available_tickets(self, obj):
+        if obj.available_tickets_count is None:
+            return "Unlimited"
+        return obj.available_tickets_count
 
 
 class SessionAdmin(admin.ModelAdmin):
@@ -47,12 +89,13 @@ class ResourceAdmin(ImportExportModelAdmin):
     list_display = ["session", "title"]
 
 class BillingAdmin(admin.ModelAdmin):
-    list_display = ["client", "total", "status", "date"]
+    list_display = ["buyer", "guest_email", "total", "status", "date"]
+
+    @admin.display(description="Buyer")
+    def buyer(self, obj):
+        return obj.buyer_name
 
 
 admin.site.register(models.Service, ServiceAdmin)
 admin.site.register(models.Session, SessionAdmin)
-admin.site.register(models.SessionNote, SessionNoteAdmin)
-admin.site.register(models.ActionItem, ActionItemAdmin)
-admin.site.register(models.Resource, ResourceAdmin)
 admin.site.register(models.Billing, BillingAdmin)

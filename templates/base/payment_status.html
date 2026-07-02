@@ -1,21 +1,31 @@
 {% extends 'partials/base.html' %}
 {% block content %}
-<section class="container">
+<section class="container mt-5">
     <div class="container">
         {% if payment_status == "paid" %}
-        <div class="d-flex justify-content-center flex-column align-items-center mb-5">
-            <i class="fas fa-check-circle text-success display-1"></i>
-            <h1>Session Scheduled Successfully</h1>
-            <p class="text-success">Thanks for boking a session <i class="fas fa-check-circle"></i></p>
-            <a href="{% url 'client:dashboard' %}" class="btn btn-success d-flex align-items-center">My Dashboard <i class="bi bi-grid-fill ms-2"></i></a>
+        <div class="d-flex justify-content-center flex-column align-items-center text-center mb-5">
+            <i class="fas fa-check-circle text-primary display-1"></i>
+            <h1 class="mt-3">Ticket Booked Successfully</h1>
+            <p class="text-secondary">Thanks for booking your event. Your invoice will be sent by email.</p>
+            <a href="/#services" class="btn btn-primary d-flex align-items-center">Back to Events <i class="bi bi-grid-fill ms-2"></i></a>
         </div>
         {% endif  %}
 
+        {% if payment_status == "reserved" %}
+        <div class="d-flex justify-content-center flex-column align-items-center text-center mb-5">
+            <i class="fas fa-money-bill-wave text-primary display-1"></i>
+            <h1 class="mt-3">Ticket Reserved</h1>
+            <p class="text-secondary">Your ticket is reserved. Please pay with cash at the venue.</p>
+            <a href="{% url 'client:dashboard' %}" class="btn btn-primary d-flex align-items-center">My Dashboard <i class="bi bi-grid-fill ms-2"></i></a>
+        </div>
+        {% endif %}
+
         {% if payment_status == "failed" %}
-        <div class="d-flex justify-content-center flex-column align-items-center mb-5">
+        <div class="d-flex justify-content-center flex-column align-items-center text-center mb-5">
             <i class="fas fa-exclamation-triangle fa-flip text-danger display-1"></i>
-            <h1>Session Scheduling Failed</h1>
-            <p>We couldn't process your payment, please try again later. Thank you</p>
+            <h1 class="mt-3">Ticket Booking Failed</h1>
+            <p class="text-secondary">We couldn't process your payment. Please try again later.</p>
+            <a href="/#services" class="btn btn-outline-primary">Back to Events</a>
         </div>
         {% endif %}
     </div>

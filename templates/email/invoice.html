@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <style>
+            body { font-family: Arial, sans-serif; background: #f4f4f4; color: #222; padding: 20px; }
+            .invoice { background: #fff; max-width: 640px; margin: 0 auto; padding: 24px; border-radius: 8px; }
+            .row { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0; }
+            h1 { margin-top: 0; color: #0d6efd; }
+            .total { font-size: 20px; font-weight: bold; }
+        </style>
+    </head>
+    <body>
+        <div class="invoice">
+            <h1>LEO PADEL ACADEMY Invoice</h1>
+            <p>Thank you for booking your ticket.</p>
+
+            <div class="row"><strong>Invoice ID</strong><span>{{ billing.billing_id }}</span></div>
+            <div class="row"><strong>Event</strong><span>{{ billing.session.service.name }}</span></div>
+            <div class="row"><strong>Ticket holder</strong><span>{{ billing.buyer_name }}</span></div>
+            <div class="row"><strong>Email</strong><span>{{ billing.recipient_email }}</span></div>
+            <div class="row"><strong>Status</strong><span>{{ billing.status }}</span></div>
+            <div class="row"><strong>Subtotal</strong><span>{{ billing.sub_total }} {{ payment_currency }}</span></div>
+            <div class="row"><strong>VAT</strong><span>{{ billing.tax }} {{ payment_currency }}</span></div>
+            <div class="row total"><strong>Total</strong><span>{{ billing.total }} {{ payment_currency }}</span></div>
+
+            <p>Your ticket is confirmed after successful payment.</p>
+        </div>
+    </body>
+</html>

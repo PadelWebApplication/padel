@@ -6,13 +6,13 @@
             {% include "client/sidebar.html" %}
             {% for session in sessions %}
             <div class="col-lg-9 col-md-8 col-12">
-                <h4 class="mb-0 mb-4 fw-bold">Session</h4>
+                <h4 class="mb-0 mb-4 fw-bold">Ticket</h4>
                 <div class="card mb-4">
                     <div class="shadow border p-3 mb-4 rounded-4">
                         <a href="{% url "client:session_detail" session.session_id %}">
-                            <p><span class="fw-semibold text-dark">Session ID:</span> {{ session.session_id }}</p>
+                            <p><span class="fw-semibold text-dark">Ticket ID:</span> {{ session.session_id }}</p>
                             <p><span class="fw-semibold text-dark">Service:</span> {{ session.service }}</p>
-                            <p><span class="fw-semibold text-dark">Coach:</span> {{ session.coach.full_name }}</p>
+                            <p><span class="fw-semibold text-dark">Coach/Event:</span> {% if session.coach %}{{ session.coach.full_name }}{% else %}Academy Event{% endif %}</p>
                             <p><span class="fw-semibold text-dark">Status:</span> {{ session.status }}</p>
                             <p><span class="fw-semibold text-dark">Date:</span> {{ session.session_date }}</p>
                             <button class="btn btn-secondary btn-sm">View More <i class="fas fa-eye ms-2"></i></button>

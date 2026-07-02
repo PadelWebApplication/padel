@@ -1,52 +1,80 @@
 {% extends 'partials/base.html' %}
+{% load static %}
 
 {% block content %}
-<section class="container">
-    <div class="row d-flex justify-content-center align-items-center">
-        <div class="col-12 col-lg-7 p-4 rounded-3 bg-white">
-            <h1 class="display-4 fw-bold mt-5">
-                <span class="text-primary"><b>{{ service.name }}</b></span>
-            </h1>
-            <p class="fs-4 mt-4">{{ service.description }}</p>
-        </div>
-        <div class="col-12 col-lg-5">
-            <img class="img-fluid mt-4" style="width: 100%; height: 350px; object-fit: cover; border-radius: 10px" src="{{ service.image.url }}" alt="" />
+<section class="figma-hero" style="background-image: url('{% if service.image %}{{ service.image.url }}{% else %}{% static 'images/racket.jpg' %}{% endif %}');">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="figma-kicker">LEO PADEL ACADEMY / {{ service.get_type_display }}</span>
+                <h1 class="figma-title mt-3">{{ service.name }}</h1>
+                <p class="figma-copy mt-4">{{ service.description }}</p>
+                <div class="d-flex flex-column flex-sm-row gap-3 mt-5">
+                {% if service.is_sold_out %}
+                    <button class="btn btn-secondary btn-lg" disabled>Sold Out</button>
+                {% else %}
+                    <a href="{% url 'base:buy_ticket' service.id %}" class="btn btn-light btn-lg">Buy Ticket <i class="fas fa-ticket-alt ms-2"></i></a>
+                    {% if request.user.is_authenticated %}
+                        <a href="{% url 'base:reserve_cash_ticket' service.id %}" class="btn btn-outline-light btn-lg">Reserve Cash <i class="fas fa-money-bill-wave ms-2"></i></a>
+                    {% endif %}
+                {% endif %}
+                    <a href="/#services" class="btn btn-outline-light btn-lg">All Events</a>
+                </div>
+            </div>
         </div>
     </div>
 </section>
-<section class="container">
-    <div class="">
-        <h2 class="">Available Coaches</h2>
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Debitis, reiciendis.</p>
+
+<section class="container mt-5">
+    <div>
+        <h2 class="section-heading">Event Details</h2>
+        <p>Review the event or camp description before buying a ticket.</p>
+        <div class="soft-detail-panel p-4 mb-4">
+            <p class="mb-2"><span class="fw-semibold text-dark">Type:</span> {{ service.get_type_display }}</p>
+            <p class="mb-2"><span class="fw-semibold text-dark">Ticket price:</span> {{ service.cost }} AED</p>
+            <p class="mb-2"><span class="fw-semibold text-dark">Tickets:</span>
+                {% if service.available_tickets_count == None %}
+                    Unlimited
+                {% elif service.is_sold_out %}
+                    Sold out
+                {% else %}
+                    {{ service.available_tickets_count }} available
+                {% endif %}
+            </p>
+            <p class="mb-2"><span class="fw-semibold text-dark">Format:</span> {% if service.type == 'camp' %}Week-long entertainment and training program{% else %}Single padel game or academy event{% endif %}</p>
+            <p class="mb-0"><span class="fw-semibold text-dark">Description:</span> {{ service.description }}</p>
+        </div>
     </div>
-    <div class="">
+
+    {% if service.available_coaches.exists %}
+    <div>
+        <h2 class="section-heading">Available Coaches</h2>
         {% for coach in service.available_coaches.all %}
-        <div class="p-1 mb-4 shadow d-flex align-items-center">
+        <div class="soft-detail-panel p-3 mb-4 d-flex flex-column flex-md-row align-items-md-center">
             {% if coach.image %}
-                <a href="course-detail.html">
-                <img src="{{ coach.image.url }}" alt="course" style="width: 70px; height: 70px; object-fit: cover; border-radius: 5px" class="card-img-top" />
-            </a>
+                <img src="{{ coach.image.url }}" alt="{{ coach.full_name }}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 5px" class="card-img-top" />
             {% endif %}
             <div class="card-body">
-                <div class="mt-2 d-flex justify-content-between align-items-center">
+                <div class="mt-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                     <div>
-                        <h5 class="mb-1 text-truncate-line-2"><a href="course-detail.html" class="text-inherit text-dark text-decoration-none">{{ coach.full_name }}</a></h5>
+                        <h5 class="mb-1 text-truncate-line-2">{{ coach.full_name }}</h5>
                         <div class="d-flex gap-2">
                             <p class="fw-semibold mt-0 mb-0">Time Available:</p>
                             <p class="mt-0 mb-0">{{ coach.next_available_session_date }}</p>
                         </div>
                         <div class="d-flex gap-2">
                             <p class="fw-semibold mt-0 mb-0">Price:</p>
-                            <p class="mt-0 mb-0">{{ service.cost }}</p>
+                            <p class="mt-0 mb-0">{{ service.cost }} AED</p>
                         </div>
                     </div>
                     <div>
-                        <a href="{% url 'base:book_session' service.id coach.id %}" class="btn btn-primary me-4">Book Now <i class="fas fa-arrow-right ms-2"></i></a>
+                        <a href="{% url 'base:book_session' service.id coach.id %}" class="btn btn-primary me-md-4">Book Now <i class="fas fa-arrow-right ms-2"></i></a>
                     </div>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
+    {% endif %}
 </section>
 {% endblock content %}

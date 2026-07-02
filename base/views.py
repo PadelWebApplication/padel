@@ -1,3 +1,6 @@
+import json
+
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
@@ -7,7 +10,6 @@ from django.http import JsonResponse
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-import requests
 import stripe
 
 from base import models as base_models
@@ -33,6 +35,96 @@ def service_detail(request, service_id):
     }
 
     return render(request, "base/service_detail.html", context)
+
+
+def buy_ticket(request, service_id):
+    service = base_models.Service.objects.get(id=service_id)
+
+    if service.is_sold_out:
+        messages.error(request, "This event is sold out.")
+        return redirect("base:service_detail", service.id)
+
+    client = None
+    if request.user.is_authenticated:
+        client, _ = client_models.Client.objects.get_or_create(
+            user=request.user,
+            defaults={
+                "full_name": request.user.email,
+                "email": request.user.email,
+            },
+        )
+
+    coach = service.available_coaches.first()
+
+    session = base_models.Session.objects.create(
+        service=service,
+        coach=coach,
+        client=client,
+        session_date=coach.next_available_session_date if coach else None,
+    )
+
+    billing = base_models.Billing.objects.create(
+        client=client,
+        session=session,
+        guest_email=client.email if client else None,
+        sub_total=service.cost,
+        tax=service.cost * 5 / 100,
+        total=service.cost + (service.cost * 5 / 100),
+        status=BillingStatusChoices.unpaid,
+    )
+
+    return redirect("base:checkout", billing.billing_id)
+
+
+@login_required
+def reserve_cash_ticket(request, service_id):
+    service = base_models.Service.objects.get(id=service_id)
+
+    if service.is_sold_out:
+        messages.error(request, "This event is sold out.")
+        return redirect("base:service_detail", service.id)
+
+    client, _ = client_models.Client.objects.get_or_create(
+        user=request.user,
+        defaults={
+            "full_name": request.user.email,
+            "email": request.user.email,
+        },
+    )
+    coach = service.available_coaches.first()
+
+    session = base_models.Session.objects.create(
+        service=service,
+        coach=coach,
+        client=client,
+        session_date=coach.next_available_session_date if coach else None,
+        status=SessionStatusChoices.pending,
+    )
+
+    billing = base_models.Billing.objects.create(
+        client=client,
+        session=session,
+        guest_email=client.email,
+        sub_total=service.cost,
+        tax=service.cost * 5 / 100,
+        total=service.cost + (service.cost * 5 / 100),
+        status=BillingStatusChoices.reserved,
+    )
+
+    client_models.Notification.objects.create(
+        client=client,
+        session=session,
+        type=ClientNotificationTypeChoices.session_scheduled,
+    )
+    if coach:
+        coach_models.Notification.objects.create(
+            coach=coach,
+            session=session,
+            type=CoachNotificationTypeChoices.new_session,
+        )
+
+    messages.success(request, "Ticket reserved. You can pay with cash at the venue.")
+    return redirect(f"/payment_status/{billing.billing_id}/?payment_status=reserved")
 
 
 @login_required
@@ -85,33 +177,76 @@ def book_session(request, service_id, coach_id):
     return render(request, "base/book_session.html", context)
 
 
-@login_required
 def checkout(request, billing_id):
     billing = base_models.Billing.objects.get(billing_id=billing_id)
 
     context = {
         "billing": billing,
         "stripe_public_key": settings.STRIPE_PUBLIC_KEY,
-        "paypal_client_id": settings.PAYPAL_CLIENT_ID
+        "payment_currency": settings.PAYMENT_CURRENCY,
     }
 
     return render(request, "base/checkout.html", context)
 
 
+def set_billing_email_from_request(request, billing):
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except json.JSONDecodeError:
+        data = {}
+
+    email = (data.get("email") or request.GET.get("email") or "").strip()
+    if email:
+        billing.guest_email = email
+        if billing.client and not billing.client.email:
+            billing.client.email = email
+            billing.client.save()
+        billing.save()
+
+    return billing.recipient_email
+
+
+def send_invoice_email(billing):
+    recipient_email = billing.recipient_email
+    if not recipient_email:
+        return
+
+    merge_data = {
+        "billing": billing,
+        "payment_currency": settings.PAYMENT_CURRENCY,
+    }
+    subject = f"Invoice for {billing.session.service.name}"
+    text_body = render_to_string("email/invoice.txt", merge_data)
+    html_body = render_to_string("email/invoice.html", merge_data)
+
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        from_email=settings.FROM_EMAIL,
+        to=[recipient_email],
+        body=text_body,
+    )
+    msg.attach_alternative(html_body, "text/html")
+    msg.send()
+
+
 @csrf_exempt
 def stripe_payment(request, billing_id):
     billing = base_models.Billing.objects.get(billing_id=billing_id)
+    recipient_email = set_billing_email_from_request(request, billing)
+    if not recipient_email:
+        return JsonResponse({"message": "Email is required"}, status=400)
+
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
     checkout_session = stripe.checkout.Session.create(
-        customer_email=billing.client.email,
+        customer_email=recipient_email,
         payment_method_types=["card"],
         line_items=[
             {
                 "price_data": {
-                    "currency": "USD",
+                    "currency": settings.PAYMENT_CURRENCY.lower(),
                     "product_data": {
-                        "name": billing.client.full_name
+                        "name": billing.session.service.name
                     },
                     "unit_amount": int(billing.total * 100)
                 },
@@ -139,112 +274,26 @@ def stripe_payment_verify(request, billing_id):
             billing.session.status = SessionStatusChoices.scheduled
             billing.session.save()
 
-            coach_models.Notification.objects.create(
-                coach=billing.session.coach,
-                session=billing.session,
-                type=CoachNotificationTypeChoices.new_session
-            )
-
-            client_models.Notification.objects.create(
-                client=billing.session.client,
-                session=billing.session,
-                type=ClientNotificationTypeChoices.session_scheduled
-            )
-
-            try:
-                merge_data = {
-                    "billing": billing,
-                }
-
-                # Send session to coach 
-                subject = "New Session"
-                text_body = render_to_string("email/new_session.txt", merge_data)
-                html_body = render_to_string("email/new_session.html", merge_data)
-
-                msg = EmailMultiAlternatives(
-                    subject=subject,
-                    from_email=settings.FROM_EMAIL,
-                    to=[billing.session.coach.user.email],
-                    body=text_body
-                )
-                msg.attach_alternative(html_body, "text/html")
-                msg.send()
-
-                # Send session booked to client 
-                subject = "Session Booked Successfully"
-                text_body = render_to_string("email/session_booked.txt", merge_data)
-                html_body = render_to_string("email/session_booked.html", merge_data)
-
-                msg = EmailMultiAlternatives(
-                    subject=subject,
-                    from_email=settings.FROM_EMAIL,
-                    to=[billing.session.client.email],
-                    body=text_body
-                )
-                msg.attach_alternative(html_body, "text/html")
-                msg.send()
-            except Exception as e:
-                print(f"Email failed to send: {e}")
-
-            return redirect(f"/payment_status/{billing.billing_id}/?payment_status=paid")
-    else:
-        return redirect(f"/payment_status/{billing.billing_id}/?payment_status=failed")
-    
-
-def get_paypal_access_token():
-    token_url = "https://api.sandbox.paypal.com/v1/oauth2/token"
-    data = {"grant_type": "client_credentials"}
-    auth = (settings.PAYPAL_CLIENT_ID, settings.PAYPAL_SECRET_ID)
-    response = requests.post(token_url, data=data, auth=auth)
-
-    if response.status_code == 200:
-        print("Access Token:", response.json()["access_token"])
-        return response.json()["access_token"]
-    else:
-        raise Exception(f"Failed to get access token from Paypal. Status code: {response.status_code}")
-
-
-def paypal_payment_verify(request, billing_id):
-    billing = base_models.Billing.objects.get(billing_id=billing_id)
-
-    transaction_id = request.GET.get("transaction_id")
-    paypal_api_url = f"https://api-m.sandbox.paypal.com/v2/checkout/orders/{transaction_id}"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {get_paypal_access_token()}"
-    }
-
-    response = requests.get(paypal_api_url, headers=headers)
-
-    if response.status_code == 200:
-        paypal_order_data = response.json()
-        paypal_payment_status = paypal_order_data["status"]
-
-        if paypal_payment_status == "COMPLETED":
-            if billing.status == BillingStatusChoices.unpaid:
-                billing.status = BillingStatusChoices.paid
-                billing.save()
-                billing.session.status = SessionStatusChoices.scheduled
-                billing.session.save()
-
+            if billing.session.coach:
                 coach_models.Notification.objects.create(
                     coach=billing.session.coach,
                     session=billing.session,
                     type=CoachNotificationTypeChoices.new_session
                 )
 
+            if billing.session.client:
                 client_models.Notification.objects.create(
                     client=billing.session.client,
                     session=billing.session,
                     type=ClientNotificationTypeChoices.session_scheduled
                 )
 
-                try:
-                    merge_data = {
-                        "billing": billing,
-                    }
+            try:
+                merge_data = {
+                    "billing": billing,
+                }
 
-                    # Send session to coach 
+                if billing.session.coach:
                     subject = "New Session"
                     text_body = render_to_string("email/new_session.txt", merge_data)
                     html_body = render_to_string("email/new_session.html", merge_data)
@@ -258,28 +307,15 @@ def paypal_payment_verify(request, billing_id):
                     msg.attach_alternative(html_body, "text/html")
                     msg.send()
 
-                    # Send session booked to client 
-                    subject = "Session Booked Successfully"
-                    text_body = render_to_string("email/session_booked.txt", merge_data)
-                    html_body = render_to_string("email/session_booked.html", merge_data)
+                send_invoice_email(billing)
+            except Exception as e:
+                print(f"Email failed to send: {e}")
 
-                    msg = EmailMultiAlternatives(
-                        subject=subject,
-                        from_email=settings.FROM_EMAIL,
-                        to=[billing.session.client.email],
-                        body=text_body
-                    )
-                    msg.attach_alternative(html_body, "text/html")
-                    msg.send()
-                except Exception as e:
-                    print(f"Email failed to send: {e}")
+            return redirect(f"/payment_status/{billing.billing_id}/?payment_status=paid")
+    else:
+        return redirect(f"/payment_status/{billing.billing_id}/?payment_status=failed")
+    
 
-                return redirect(f"/payment_status/{billing.billing_id}/?payment_status=paid")
-               
-    return redirect(f"/payment_status/{billing.billing_id}/?payment_status=failed")
-
-
-@login_required
 def payment_status_page(request, billing_id):
     billing = base_models.Billing.objects.get(billing_id=billing_id)
     payment_status = request.GET.get("payment_status")

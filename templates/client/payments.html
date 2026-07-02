@@ -13,8 +13,8 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Payment ID</th>
-                                    <th>Session ID</th>
-                                    <th>Coach</th>
+                                    <th>Ticket ID</th>
+                                    <th>Coach/Event</th>
                                     <th>Service</th>
                                     <th>Amount</th>
                                     <th>VAT</th>
@@ -26,10 +26,10 @@
                                 <tr>
                                     <td>{{ payment.billing_id }}</td>
                                     <td>{{ payment.session.session_id }}</td>
-                                    <td>{{ payment.session.coach.full_name }}</td>
+                                    <td>{% if payment.session.coach %}{{ payment.session.coach.full_name }}{% else %}Academy Event{% endif %}</td>
                                     <td>{{ payment.session.service.name }}</td>
-                                    <td>${{ payment.total }}</td>
-                                    <td>${{ payment.tax }}</td>
+                                    <td>{{ payment.total }} AED</td>
+                                    <td>{{ payment.tax }} AED</td>
                                     <td>{{ payment.status }}</td>
                                 </tr>
                                 {% endfor %}

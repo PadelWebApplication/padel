@@ -16,7 +16,7 @@
                                 <div class="d-flex">
                                     <h5 class="mb-0 fw-bold">{{ sessions.count }}</h5>
                                 </div>
-                                <p class="mb-0 h6 fw-semibold">Sessions</p>
+                                <p class="mb-0 h6 fw-semibold">Tickets</p>
                             </div>
                         </div>
                     </div>
@@ -42,7 +42,7 @@
                             </span>
                             <div class="ms-4">
                                 <div class="d-flex">
-                                    <h5 class="mb-0 fw-bold">${{ total_spent }}</h5>
+                                    <h5 class="mb-0 fw-bold">{{ total_spent|default:"0" }} AED</h5>
                                 </div>
                                 <p class="mb-0 h6 fw-semibold">Total Spent</p>
                             </div>
@@ -56,8 +56,8 @@
                         <table class="table mb-0 text-nowrap table-hover table-centered text-nowrap">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Session ID</th>
-                                    <th>Coach</th>
+                                    <th>Ticket ID</th>
+                                    <th>Coach/Event</th>
                                     <th>Service</th>
                                     <th>Date</th>
                                     <th>Status</th> 
@@ -68,7 +68,7 @@
                                 {% for item in sessions %}
                                 <tr>
                                     <td>{{ item.session_id }}</td>
-                                    <td>{{ item.coach.full_name }}</td>
+                                    <td>{% if item.coach %}{{ item.coach.full_name }}{% else %}Academy Event{% endif %}</td>
                                     <td>{{ item.service }}</td>
                                     <td>{{ item.session_date }}</td>
                                     <td>{{ item.status }}</td>
