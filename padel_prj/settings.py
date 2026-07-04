@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from django.contrib.messages import constants as messages
 from environs import Env
 import dj_database_url
@@ -21,6 +22,34 @@ env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def clean_database_url(database_url):
+    if not database_url:
+        return database_url
+
+    allowed_query_keys = {
+        "application_name",
+        "connect_timeout",
+        "gssencmode",
+        "keepalives",
+        "keepalives_count",
+        "keepalives_idle",
+        "keepalives_interval",
+        "options",
+        "sslcert",
+        "sslcompression",
+        "sslcrl",
+        "sslkey",
+        "sslmode",
+        "sslrootcert",
+        "target_session_attrs",
+    }
+    parts = urlsplit(database_url)
+    query = urlencode(
+        [(key, value) for key, value in parse_qsl(parts.query, keep_blank_values=True) if key in allowed_query_keys]
+    )
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, query, parts.fragment))
 
 
 # Quick-start development settings - unsuitable for production
@@ -115,6 +144,7 @@ DATABASE_URL = (
     or env('POSTGRES_URL', default=None)
     or env('POSTGRES_PRISMA_URL', default=None)
 )
+DATABASE_URL = clean_database_url(DATABASE_URL)
 SQLITE_NAME = env(
     'SQLITE_NAME',
     default='/tmp/db.sqlite3' if env.bool('VERCEL', default=False) else str(BASE_DIR / 'db.sqlite3'),
