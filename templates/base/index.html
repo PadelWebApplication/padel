@@ -8,7 +8,7 @@
             <div class="col-lg-8">
                 <h1 class="figma-title mt-3">Padel Academy</h1>
                 <p class="figma-copy mt-4">Choose upcoming padel games, week-long camps, and academy events. Tickets are limited, paid in AED, and invoices are sent by email.</p>
-                <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-3 mt-5">
+                <div class="hero-actions d-flex flex-column flex-sm-row align-items-sm-center gap-3 mt-5">
                     <a href="#services" class="btn btn-light btn-lg">View Events <i class="fas fa-arrow-right ms-2"></i></a>
                     {% if not request.user.is_authenticated %}
                         <a href="{% url 'userauths:register' %}" class="btn btn-outline-light btn-lg">Create Account <i class="fas fa-user-plus ms-1"></i></a>
@@ -19,8 +19,8 @@
     </div>
 </section>
 
-<section id="services" class="container mt-4">
-    <div class="py-3 d-flex flex-column flex-lg-row justify-content-between gap-3">
+<section id="services" class="events-section container mt-3">
+    <div class="events-heading py-2 d-flex flex-column flex-lg-row justify-content-between gap-3">
         <div>
             <h2 class="section-heading mb-0">Upcoming Games & Camps</h2>
         </div>
@@ -83,13 +83,13 @@
     </div>
 </section>
 
-<section class="container mt-4">
+<section class="intro-panel container mt-3">
     <div class="row d-flex align-items-center soft-detail-panel p-3 p-lg-5">
         <div class="col-lg-6">
             <h1 class="section-heading">Play, train, compete.</h1>
             <p class="text-secondary">LEO PADEL ACADEMY brings together social games, focused training camps, and competitive events. Each listing includes the format, price, and event description so players can choose the right experience.</p>
 
-            <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2 mt-5">
+            <div class="intro-panel-actions d-flex flex-column flex-sm-row align-items-sm-center gap-2 mt-4">
                 <a href="#services" class="btn btn-outline-primary">View Events <i class="fas fa-video ms-1"></i></a>
                 {% if not request.user.is_authenticated %}
                     <a href="{% url 'userauths:register' %}" class="btn btn-primary">Create Account <i class="fas fa-user-plus ms-1"></i></a>
@@ -97,7 +97,7 @@
             </div>
         </div>
         <div class="col-lg-6">
-            <img src="{% static 'images/racket.jpg' %}" class="img-fluid rounded-4" style="width: 100%; height: 400px; object-fit: cover" alt="Padel racket" />
+            <img src="{% static 'images/racket.jpg' %}" class="intro-panel-image img-fluid rounded-4" alt="Padel racket" />
         </div>
     </div>
 </section>

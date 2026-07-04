@@ -1,6 +1,4 @@
 from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -45,6 +43,12 @@ def redirect_after_auth(request):
     return redirect("base:index")
 
 
+def add_form_errors_to_messages(request, serializer):
+    for field, errors in serializer.errors.items():
+        for error in errors:
+            messages.error(request, f"{field}: {error}")
+
+
 class RegisterView(APIView):
     def get(self, request):
         return render(
@@ -72,7 +76,16 @@ class RegisterView(APIView):
 
             return redirect_after_auth(request)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        add_form_errors_to_messages(request, serializer)
+        return render(
+            request,
+            'userauths/register.html',
+            {
+                'next_url': request.data.get('next', ''),
+                'form_data': request.data,
+            },
+            status=400,
+        )
 
 
 class LoginView(APIView):
@@ -96,12 +109,27 @@ class LoginView(APIView):
                 login(request, user)
                 return redirect_after_auth(request)
             else:
-                return Response(
-                    {'message': 'Invalid credentials'},
-                    status=status.HTTP_401_UNAUTHORIZED,
+                messages.error(request, "Invalid email or password.")
+                return render(
+                    request,
+                    'userauths/login.html',
+                    {
+                        'next_url': request.data.get('next', ''),
+                        'email': email,
+                    },
+                    status=400,
                 )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        add_form_errors_to_messages(request, serializer)
+        return render(
+            request,
+            'userauths/login.html',
+            {
+                'next_url': request.data.get('next', ''),
+                'email': request.data.get('email', ''),
+            },
+            status=400,
+        )
 
 
 class LogoutView(APIView):

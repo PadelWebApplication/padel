@@ -6,8 +6,8 @@
             {% include "client/sidebar.html" %}
             <div class="col-lg-9 col-md-8 col-12">
                 <h4 class="mb-0 mb-4 fw-bold">Session Detail {{ session.session_id }}</h4>
-                <div class="card mb-4">
-                    <div class="shadow border p-3 mb-4 rounded-4">
+                <div class="detail-card">
+                    <div class="detail-card-body">
                         <p>
                             <a href="{% url "client:session_detail" session.session_id %}">
                                 <p><span class="fw-semibold text-dark">Session ID:</span> {{ session.session_id }}</p>
@@ -50,10 +50,10 @@
                         <h4 class="mb-0 mb-4 fw-bold">Session Note</h4>
                     </div>
 
-                    <div class="card mb-4">
-                        <div class="border p-3 mb-4 rounded-4">
+                    <div class="detail-card">
+                        <div class="detail-card-body">
                             {% if session_note %}
-                                <div class="shadow p-3 rounded-4 mb-3">
+                                <div class="detail-item">
                                     <p><span class="fw-semibold text-dark">Summary:</span> {{ session_note.summary }}</p>
                                     <p><span class="fw-semibold text-dark">Client Mindset:</span> {{ session_note.client_mindset }}</p>
                                     <p><span class="fw-semibold text-dark">Coach Observations:</span> {{ session_note.coach_observations }}</p>
@@ -71,10 +71,10 @@
                         <h4 class="mb-0 mb-4 fw-bold">Action Items</h4>
                     </div>
 
-                    <div class="card mb-4">
-                        <div class="border p-3 mb-4 rounded-4">
+                    <div class="detail-card">
+                        <div class="detail-card-body">
                             {% for item in action_items %}
-                            <div class="shadow p-3 rounded-4 mb-3">
+                            <div class="detail-item">
                                 <p><span class="fw-semibold text-dark">Task:</span> {{ item.task }}</p>
                                 <p><span class="fw-semibold text-dark">Description:</span> {{ item.description }}</p>
                                 <p><span class="fw-semibold text-dark">Due Date:</span> {{ item.due_date }}</p>
@@ -92,10 +92,10 @@
                     <h4 class="mb-0 mb-4 fw-bold">Resources</h4>
                 </div>
 
-                <div class="card mb-4">
-                    <div class="border p-3 mb-4 rounded-4">
+                <div class="detail-card">
+                    <div class="detail-card-body">
                         {% for resource in resources %}
-                        <div class="shadow p-3 rounded-4 mb-3">
+                        <div class="detail-item">
                             <p><span class="fw-semibold text-dark">Title:</span> {{ resource.title }}</p>
                             {% if resource.link %}
                                 <p><span class="fw-semibold text-dark">Link:</span> <a href="{{ resource.link }}" target="_blank">{{ resource.link }}</a></p>

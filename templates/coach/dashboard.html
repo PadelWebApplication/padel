@@ -7,12 +7,12 @@
             <div class="col-lg-9 col-md-8 col-12">
                 <div class="row mb-4">
                     <h4 class="mb-0 mb-4 fw-bold">Dashboard</h4>
-                    <div class="col-sm-6 col-lg-6 mb-3 mb-lg-0">
-                        <div class="d-flex justify-content-center align-items-center p-4 bg-danger bg-opacity-10 rounded-3">
+                    <div class="col-12 col-lg-6 mb-3 mb-lg-0">
+                        <div class="dashboard-stat d-flex align-items-center p-4 bg-danger bg-opacity-10 rounded-3">
                             <span class="display-6 lh-1 text-purple mb-0">
                                 <i class="fas fa-calendar text-danger"></i>
                             </span>
-                            <div class="ms-4">
+                            <div>
                                 <div class="d-flex">
                                     <h5 class="mb-0 fw-bold">{{ sessions.count }}</h5>
                                 </div>
@@ -20,12 +20,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-6 mb-3 mb-lg-0">
-                        <div class="d-flex justify-content-center align-items-center p-4 bg-dark bg-opacity-10 rounded-3">
+                    <div class="col-12 col-lg-6 mb-3 mb-lg-0">
+                        <div class="dashboard-stat d-flex align-items-center p-4 bg-dark bg-opacity-10 rounded-3">
                             <span class="display-6 lh-1 text-dark mb-0">
                                 <i class="fas fa-bell"></i>
                             </span>
-                            <div class="ms-4">
+                            <div>
                                 <div class="d-flex">
                                     <h5 class="mb-0 fw-bold">{{ notifications.count }}</h5>
                                 </div>
@@ -70,4 +70,3 @@
     </div>
 </section>
 {% endblock content %}
-
