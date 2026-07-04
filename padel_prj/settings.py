@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 from django.contrib.messages import constants as messages
 from environs import Env
+import dj_database_url
 
 env = Env()
 env.read_env()
@@ -26,14 +27,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!9_fo(y9gwv$tm154$9gsr++htng17pts-@(+n+*&h98$(^w*o'
+SECRET_KEY = env(
+    'SECRET_KEY',
+    default='django-insecure-!9_fo(y9gwv$tm154$9gsr++htng17pts-@(+n+*&h98$(^w*o',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=True)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list(
+    'ALLOWED_HOSTS',
+    default=['localhost', '127.0.0.1', '.vercel.app'],
+)
+
+CSRF_TRUSTED_ORIGINS = env.list(
+    'CSRF_TRUSTED_ORIGINS',
+    default=['https://*.vercel.app'],
+)
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=not DEBUG)
+SESSION_COOKIE_SECURE = env.bool('SESSION_COOKIE_SECURE', default=not DEBUG)
+CSRF_COOKIE_SECURE = env.bool('CSRF_COOKIE_SECURE', default=not DEBUG)
+SECURE_HSTS_SECONDS = env.int('SECURE_HSTS_SECONDS', default=0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=False)
+SECURE_HSTS_PRELOAD = env.bool('SECURE_HSTS_PRELOAD', default=False)
 
 # Application definition
 
@@ -57,6 +76,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -90,12 +110,21 @@ WSGI_APPLICATION = 'padel_prj.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+DATABASE_URL = env('DATABASE_URL', default=None)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+if DATABASE_URL:
+    DATABASES['default'] = dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=not DEBUG,
+    )
 
 
 # Password validation
@@ -138,6 +167,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -155,20 +186,20 @@ MESSAGE_TAGS = {
 }
 
 ANYMAIL = {
-    "MAILGUN_API_KEY": env("MAILGUN_API_KEY"),
-    "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN"),
+    "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=""),
+    "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN", default=""),
 }
 
-FROM_EMAIL = env("MAILGUN_FROM_EMAIL")
+FROM_EMAIL = env("MAILGUN_FROM_EMAIL", default="")
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
-DEFAULT_FROM_EMAIL = env("MAILGUN_DEFAULT_FROM_EMAIL")
-SERVER_EMAIL = env("MAILGUN_SERVER_EMAIL")
+DEFAULT_FROM_EMAIL = env("MAILGUN_DEFAULT_FROM_EMAIL", default="")
+SERVER_EMAIL = env("MAILGUN_SERVER_EMAIL", default="")
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
-STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY", default="")
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="")
 
 PAYMENT_CURRENCY = "AED"
 
