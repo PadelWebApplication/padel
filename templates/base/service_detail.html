@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<section class="figma-hero" style="background-image: url('{% if service.image %}{{ service.image.url }}{% else %}{% static 'images/racket.jpg' %}{% endif %}');">
+<section class="figma-hero" style="background-image: url('{% if use_uploaded_media and service.image %}{{ service.image.url }}{% else %}{% static 'images/racket.jpg' %}{% endif %}');">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">

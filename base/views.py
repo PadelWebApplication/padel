@@ -22,7 +22,8 @@ from services.client.enum import NotificationTypeChoices as ClientNotificationTy
 def index(request):
     services = base_models.Service.objects.all()
     context = {
-        "services": services
+        "services": services,
+        "use_uploaded_media": settings.USE_UPLOADED_MEDIA,
     }
 
     return render(request, "base/index.html", context)
@@ -31,7 +32,8 @@ def index(request):
 def service_detail(request, service_id):
     service = base_models.Service.objects.get(id=service_id)
     context = {
-        "service": service
+        "service": service,
+        "use_uploaded_media": settings.USE_UPLOADED_MEDIA,
     }
 
     return render(request, "base/service_detail.html", context)

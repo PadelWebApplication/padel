@@ -66,13 +66,10 @@ class RegisterView(APIView):
             full_name = serializer.validated_data.get('full_name')
 
             user = User.objects.create_user(email=email, password=password)
-
-            user_authenticate = authenticate(request, email=email, password=password)
-            login(request, user_authenticate)
-
             client_models.Client.objects.create(
                 user=user, full_name=full_name, email=email
             )
+            login(request, user)
 
             return redirect_after_auth(request)
 

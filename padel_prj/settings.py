@@ -211,6 +211,8 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+USE_UPLOADED_MEDIA = env.bool('USE_UPLOADED_MEDIA', default=not env.bool('VERCEL', default=False))
+
 LOGIN_URL = '/auth/login/'
 
 LOGIN_REDIRECT_URL = '/'
